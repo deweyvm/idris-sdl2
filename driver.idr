@@ -1,10 +1,13 @@
 module Main
 
-%include C "idris_SDL_video.h"
-%link C "idris_SDL_video.c"
-%lib C "SDL2"
+import SDL.Common
+import SDL.Rect
 
-SDL_Init : () -> IO String
+--- %include C "idris_SDL_video.h"
+--- %link C "idris_SDL_video.c"
+--- %lib C "SDL2"
+
+{-SDL_Init : () -> IO String
 SDL_Init i = mkForeign (FFun "mySDL_Init" [FUnit] FString) i
 
 SDL_Quit : () -> IO ()
@@ -24,16 +27,7 @@ SDL_SetWindowPosition window x y = mkForeign (FFun "mySDL_SetWindowPosition" [FP
 
 SDL_Delay : Int -> IO ()
 SDL_Delay t = mkForeign (FFun "mySDL_Delay" [FInt] FUnit) t
-
+-}
 main : IO ()
 main = do
-    putStrLn "hello world"
-    plat <- SDL_GetPlatform ()
-    err <- SDL_Init ()
-    ptr <- SDL_CreateWindow ()
-    SDL_SetWindowPosition ptr 0 0 
-    --SDL_Quit ()
-    putStrLn plat
-    SDL_Delay 3000
-    putStrLn err
-  --  printThing ()
+    putStrLn $ show $ StdInc.atan 1
