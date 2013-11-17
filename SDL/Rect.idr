@@ -8,4 +8,4 @@ instance Show Rect where
     show (mkRect x y w h) = "rect"
 
 RectEmpty : Rect -> Bool
-RectEmpty r = True
+RectEmpty (mkRect x y w h) = w <= 0 || h <= 0

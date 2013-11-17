@@ -30,4 +30,4 @@ SDL_Delay t = mkForeign (FFun "mySDL_Delay" [FInt] FUnit) t
 -}
 main : IO ()
 main = do
-    putStrLn $ show $ StdInc.atan 1
+    putStrLn $ show $ mkRect 1 2 3 4
