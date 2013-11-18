@@ -35,23 +35,52 @@ public
 GetDisplayName : Int -> IO String
 GetDisplayName displayIndex = mkForeign (FFun "SDL_GetDisplayName" [FInt] FString) displayIndex
 
-getDisplayX : Int -> IO Int
-getDisplayX index = mkForeign (FFun "idris_SDL_getDisplayX" [FInt] FInt) index
+checkGetDisplayBounds : Int -> IO Int
+checkGetDisplayBounds index = mkForeign (FFun "idris_SDL_getDisplayBounds" [FInt] FInt) index
 
-getDisplayY : Int -> IO Int
-getDisplayY index = mkForeign (FFun "idris_SDL_getDisplayY" [FInt] FInt) index
+getDisplayBounds_x : IO Int
+getDisplayBounds_x = mkForeign (FFun "idris_SDL_getDisplayBounds_x" [] FIn	t) index
 
-getDisplayWidth : Int -> IO Int
-getDisplayWidth index = mkForeign (FFun "idris_SDL_getDisplayWidth" [FInt] FInt) index
+getDisplayBounds_y : IO Int
+getDisplayBounds_y = mkForeign (FFun "idris_SDL_getDisplayBounds_y" [] FInt) index
 
-getDisplayHeight : Int -> IO Int
-getDisplayHeight index =  mkForeign (FFun "idris_SDL_getDisplayHeight" [FInt] FInt) index
+getDisplayBounds_w : IO Int
+getDisplayBounds_w index = mkForeign (FFun "idris_SDL_getDisplayBounds_w" [] FInt) index
 
-public
+getDisplayBounds_h : IO Int
+getDisplayBounds_h =  mkForeign (FFun "idris_SDL_getDisplayBounds_h" [] FInt) index
+
+GetDisplayBounds : Int -> IO (Maybe Int)
+GetDisplayBounds index = do
+   isValid <- get index
+   if (not isValid) 
+     then 
+       return Nothing
+     else 
+      do
+       x <- getDisplayBounds_x
+       y <- getDisplayBounds_y
+       w <- getDisplayBounds_w
+       h <- getDisplayBounds_h
+       return $ Just $ mkRect x y w h 
+          
+        
+
+{-public
 GetDisplayBounds : Int -> IO Rect
 GetDisplayBounds index = do
-    x <- getDisplayX index
-    y <- getDisplayY index
-    w <- getDisplayWidth index
-    h <- getDisplayHeight index
+    x <- getDisplayBounds_x index
+    y <- getDisplayBounds_y index
+    w <- getDisplayBounds_w index
+    h <- getDisplayBounds_h index
     return $ mkRect x y w h
+
+public 
+GetNumDisplayModes : Int -> IO Int
+GetNumDisplayModes index = mkForeign (FFun "SDL_GetNumDisplayModes" [FInt] FInt) index
+
+data DisplayMode = mkDisplayMode Nat Int Int Int Ptr
+
+public 
+GetDisplayMode : Int -> Int -> DisplayMode
+GetDisplayMode-}

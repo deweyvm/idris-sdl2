@@ -36,7 +36,10 @@ main = do
     --driver <- GetCurrentVideoDriver
     init <- Init 32
     num <- GetDisplayBounds 0
+    case num of
+      Nothing -> putStrLn "nothing!"
+      Just rect -> putStrLn $ show rect
     putStrLn $ show init
-    putStrLn $ show num
+    
     --putStrLn $ show drivers
     --putStrLn $ show $ mkRect 1 2 3 4
