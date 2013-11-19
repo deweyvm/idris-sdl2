@@ -1,6 +1,7 @@
 module SDL.Video
 
 import SDL.Common
+import SDL.SDL
 import SDL.Rect
 
 %include C "SDL2/SDL_video.h"
@@ -39,48 +40,44 @@ checkGetDisplayBounds : Int -> IO Int
 checkGetDisplayBounds index = mkForeign (FFun "idris_SDL_getDisplayBounds" [FInt] FInt) index
 
 getDisplayBounds_x : IO Int
-getDisplayBounds_x = mkForeign (FFun "idris_SDL_getDisplayBounds_x" [] FIn	t) index
+getDisplayBounds_x = mkForeign (FFun "idris_SDL_getDisplayBounds_x" [] FInt)
 
 getDisplayBounds_y : IO Int
-getDisplayBounds_y = mkForeign (FFun "idris_SDL_getDisplayBounds_y" [] FInt) index
+getDisplayBounds_y = mkForeign (FFun "idris_SDL_getDisplayBounds_y" [] FInt)
 
 getDisplayBounds_w : IO Int
-getDisplayBounds_w index = mkForeign (FFun "idris_SDL_getDisplayBounds_w" [] FInt) index
+getDisplayBounds_w = mkForeign (FFun "idris_SDL_getDisplayBounds_w" [] FInt)
 
 getDisplayBounds_h : IO Int
-getDisplayBounds_h =  mkForeign (FFun "idris_SDL_getDisplayBounds_h" [] FInt) index
+getDisplayBounds_h =  mkForeign (FFun "idris_SDL_getDisplayBounds_h" [] FInt)
 
-GetDisplayBounds : Int -> IO (Maybe Int)
+public
+GetDisplayBounds : Int -> IO (Either String Rect)
 GetDisplayBounds index = do
-   isValid <- get index
-   if (not isValid) 
-     then 
-       return Nothing
-     else 
-      do
+   isValid <- checkGetDisplayBounds index
+   if (not (isValid==0)) 
+     then do
+       err <- GetError
+       return $ Left err
+     else do
        x <- getDisplayBounds_x
        y <- getDisplayBounds_y
        w <- getDisplayBounds_w
        h <- getDisplayBounds_h
-       return $ Just $ mkRect x y w h 
+       return $ Right $ mkRect x y w h 
           
         
-
-{-public
-GetDisplayBounds : Int -> IO Rect
-GetDisplayBounds index = do
-    x <- getDisplayBounds_x index
-    y <- getDisplayBounds_y index
-    w <- getDisplayBounds_w index
-    h <- getDisplayBounds_h index
-    return $ mkRect x y w h
-
 public 
 GetNumDisplayModes : Int -> IO Int
 GetNumDisplayModes index = mkForeign (FFun "SDL_GetNumDisplayModes" [FInt] FInt) index
 
-data DisplayMode = mkDisplayMode Nat Int Int Int Ptr
+data DisplayMode = mkDisplayMode Int Int Int Int Ptr
 
-public 
-GetDisplayMode : Int -> Int -> DisplayMode
+
+checkGetDisplayMode : Int -> Int -> IO Int
+checkGetDisplayMode displayIndex modeIndex =
+    mkForeign (FFun "idris_SDL_getDisplayMode" [FInt, FInt] FInt) displayIndex modeIndex
+
+{-public 
+GetDisplayMode : Int -> Int -> Either String DisplayMode
 GetDisplayMode-}

@@ -37,9 +37,9 @@ main = do
     init <- Init 32
     num <- GetDisplayBounds 0
     case num of
-      Nothing -> putStrLn "nothing!"
-      Just rect -> putStrLn $ show rect
-    putStrLn $ show init
+      Left err => putStrLn err
+      Right rect => putStrLn $ show rect
+    --putStrLn $ show init
     
     --putStrLn $ show drivers
     --putStrLn $ show $ mkRect 1 2 3 4
