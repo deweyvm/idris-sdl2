@@ -63,19 +63,19 @@ GetDisplayBounds index = do
         err <- GetError
         return $ Left err
       else do
-        x <- getDisplayBounds_x
-        y <- getDisplayBounds_y
-        w <- getDisplayBounds_w
-        h <- getDisplayBounds_h
-        return $ Right $ mkRect x y w h 
+        rect <- [| mkRect getDisplayBounds_x
+                          getDisplayBounds_y
+                          getDisplayBounds_w
+                          getDisplayBounds_h |]
+        return $ Right rect 
           
         
 public 
 GetNumDisplayModes : Int -> IO Int
 GetNumDisplayModes index = mkForeign (FFun "SDL_GetNumDisplayModes" [FInt] FInt) index
 
-public
-data DisplayMode = mkDisplayMode Int Int Int Int Ptr
+abstract
+data DisplayMode = mkDisplayMode Bits32 Int Int Int Ptr
 
 instance Show DisplayMode where
     show (mkDisplayMode format w h refresh_rate _) =
@@ -85,9 +85,8 @@ checkGetDisplayMode : Int -> Int -> IO Int
 checkGetDisplayMode displayIndex modeIndex =
     mkForeign (FFun "idris_SDL_getDisplayMode" [FInt, FInt] FInt) displayIndex modeIndex
 
---fixme - lossy coersion from uint to int
-getDisplayMode_format : IO Int
-getDisplayMode_format = mkForeign (FFun "idris_SDL_getDisplayMode_format" [] FInt)
+getDisplayMode_format : IO Bits32
+getDisplayMode_format = mkForeign (FFun "idris_SDL_getDisplayMode_format" [] FBits32)
 
 getDisplayMode_w : IO Int
 getDisplayMode_w = mkForeign (FFun "idris_SDL_getDisplayMode_w" [] FInt)
@@ -112,21 +111,21 @@ GetDisplayMode displayIndex modeIndex = do
         err <- GetError
         return $ Left err
       else do
-        mode <- return mkDisplayMode <$> getDisplayMode_format
-                                     <$> getDisplayMode_w
-                                     <$> getDisplayMode_h
-                                     <$> getDisplayMode_refresh_rate
-                                     <$> getDisplayMode_driverdata
+        mode <- [| mkDisplayMode getDisplayMode_format
+                                 getDisplayMode_w
+                                 getDisplayMode_h
+                                 getDisplayMode_refresh_rate
+                                 getDisplayMode_driverdata |]
         return $ Right mode
         
 checkGetDesktopDisplayMode : Int -> IO Int
 checkGetDesktopDisplayMode displayIndex = 
       mkForeign (FFun "idris_getDesktopDisplayMode" [FInt] FInt) displayIndex
 
---fixme - lossy coersion from unsigned int
-getDesktopDisplayMode_format : IO Int
+
+getDesktopDisplayMode_format : IO Bits32
 getDesktopDisplayMode_format =
-    mkForeign (FFun "idris_getDesktopDisplayMode_format" [] FInt)
+    mkForeign (FFun "idris_getDesktopDisplayMode_format" [] FBits32)
 
 getDesktopDisplayMode_w : IO Int
 getDesktopDisplayMode_w =

@@ -12,10 +12,6 @@ data Cursor = mkCursor Ptr
 class Flag a where
     toBits : a -> Bits32
 
-{-intToBool : Int -> Bool
-intToBool 0 = False
-intToBool _ = True
--}
 data SystemCursor = SystemCursorArrow
                   | SystemCursorIbeam
                   | SystemCursorWait
@@ -45,14 +41,12 @@ instance Flag SystemCursor where
     toBits SystemCursorHand      = 0x0B
     toBits NumSystemCursors      = 0x0C
 
+data MouseState = mkMouseState Int Int Bits32
+
 --fixme -- return maybe for null ptr
 public
 GetMouseFocus : IO Window
 GetMouseFocus = mkWindow `map` (mkForeign (FFun "SDL_GetMouseFocus" [] FPtr))
-
---fixme - lossy coersion from Uint32 to Int
-getMouseState_state : IO Int
-getMouseState_state = mkForeign (FFun "idris_SDL_GetMouseState_state" [] FInt)
 
 getMouseState_x : IO Int
 getMouseState_x = mkForeign (FFun "idris_SDL_GetMouseState_x" [] FInt)
@@ -60,17 +54,15 @@ getMouseState_x = mkForeign (FFun "idris_SDL_GetMouseState_x" [] FInt)
 getMouseState_y : IO Int
 getMouseState_y = mkForeign (FFun "idris_SDL_GetMouseState_y" [] FInt)
 
-public
-GetMouseState : IO (Int, Int, {-Bits32-}Int)
-GetMouseState = do
-    state <- getMouseState_state
-    x <- getMouseState_x
-    y <- getMouseState_y --todo, make function to map (, ,) over IO
-    return (x, y, state)
+getMouseState_state : IO Bits32
+getMouseState_state = mkForeign (FFun "idris_SDL_GetMouseState_state" [] FBits32)
 
---fixme - lossy coersion from Uint32 to Int
-getRelativeMouseState_state : IO Int
-getRelativeMouseState_state = mkForeign (FFun "idris_SDL_GetRelativeMouseState_state" [] FInt)
+public
+GetMouseState : IO MouseState
+GetMouseState = [| mkMouseState getMouseState_x
+                                getMouseState_y
+                                getMouseState_state |] 
+    
 
 getRelativeMouseState_x : IO Int
 getRelativeMouseState_x = mkForeign (FFun "idris_SDL_GetRelativeMouseState_x" [] FInt)
@@ -78,18 +70,22 @@ getRelativeMouseState_x = mkForeign (FFun "idris_SDL_GetRelativeMouseState_x" []
 getRelativeMouseState_y : IO Int
 getRelativeMouseState_y = mkForeign (FFun "idris_SDL_GetRelativeMouseState_y" [] FInt)
 
-com2 : a -> a -> a -> (a, a, a)
-com2 x y z = (x, y, z)
+getRelativeMouseState_state : IO Bits32
+getRelativeMouseState_state = mkForeign (FFun "idris_SDL_GetRelativeMouseState_state" [] FBits32)
 
 public
-GetRelativeMouseState : IO (Int, Int, {-Bits32-}Int)
+GetRelativeMouseState : IO MouseState
 GetRelativeMouseState = do
-    {-state <- getRelativeMouseState_state
-    x <- getRelativeMouseState_x
-    y <- getRelativeMouseState_y --todo, make function to map (, ,) over IO
-    return [| (x, y, state) |]-}
-    [| com2 getRelativeMouseState_x getRelativeMouseState_y getRelativeMouseState_state |]
+    [| mkMouseState getRelativeMouseState_x
+                    getRelativeMouseState_y
+                    getRelativeMouseState_state |]
 
 public
 GetRelativeMouseMode : IO Bool
-GetRelativeMouseMode = intToBool `map` (mkForeign (FFun "idris_SDL_GetRelativeMouseMode" [] FInt))
+GetRelativeMouseMode = fromSDLBool `map` (mkForeign (FFun "idris_SDL_GetRelativeMouseMode" [] FInt))
+
+public
+WarpMouseInWindow : Window -> Int -> Int -> IO ()
+WarpMouseInWindow (mkWindow ptr) x y =
+    mkForeign (FFun "SDL_WarpMouseInWindow" [FPtr, FInt, FInt] FUnit) ptr x y
+
