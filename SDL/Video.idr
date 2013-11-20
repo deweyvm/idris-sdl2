@@ -9,6 +9,9 @@ import SDL.Rect
 %link C "idris_SDL_video.o"
 
 public
+data Window = mkWindow Ptr
+
+public
 GetNumVideoDrivers : IO Int
 GetNumVideoDrivers = mkForeign (FFun "SDL_GetNumVideoDrivers" [] FInt) 
 
