@@ -30,15 +30,27 @@ SDL_Delay : Int -> IO ()
 SDL_Delay t = mkForeign (FFun "mySDL_Delay" [FInt] FUnit) t
 -}
 
+join' : (Show a, Show b) => Either String a -> Either String b -> String
+join' (Left s) (Left r) = s ++ r
+join' (Right s) (Left r) = (show s) ++ r
+join' (Right s) (Right r) = (show s) ++ (show r)
+join' (Left s) (Right r) = s ++ (show r)
+
 main : IO ()
 main = do
     --drivers <- GetNumVideoDrivers
     --driver <- GetCurrentVideoDriver
     init <- Init 32
     num <- GetDisplayBounds 0
-    case num of
+    mode <- GetDisplayMode 0 0
+    putStrLn $ join' num mode
+    {-case num of
       Left err => putStrLn err
       Right rect => putStrLn $ show rect
+    mode <- GetDisplayMode 0 0
+    case mode of
+      Left err => putStrLn err
+      Right m => putStrLn $ show m-}
     --putStrLn $ show init
     
     --putStrLn $ show drivers

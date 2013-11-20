@@ -18,4 +18,11 @@ int idris_SDL_getDisplayMode_refresh_rate();
 void* idris_SDL_getDisplayMode_driverdata();
 
 
+int idris_getDesktopDisplayMode(int displayIndex);
+Uint32 idris_getDesktopDisplayMode_format();
+int idris_getDesktopDisplayMode_w();
+int idris_getDesktopDisplayMode_h();
+int idris_getDesktopDisplayMode_refresh_rate();
+void* idris_getDesktopDisplayMode_driverdata();
+
 #endif /*IDRIS_SDL_VIDEO_H*/
