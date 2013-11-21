@@ -2,9 +2,11 @@ module Main
 
 import SDL.Common
 import SDL.SDL
+import SDL.Timer
 import SDL.Rect
 import SDL.Video
 import SDL.Mouse
+import SDL.Clipboard
 
 join' : (Show a, Show b) => Either String a -> Either String b -> String
 join' (Left s) (Left r) = s ++ r
@@ -12,11 +14,30 @@ join' (Right s) (Left r) = (show s) ++ r
 join' (Right s) (Right r) = (show s) ++ (show r)
 join' (Left s) (Right r) = s ++ (show r)
 
+instance (Show a, Show b) => Show (Either a b) where
+   show (Left l) = "Left " ++ (show l)
+   show (Right r) = "Right " ++ (show r)
+
+doInit : IO ()
+doInit = do
+    init <- Init 7231
+    putStrLn $ show init
+    
+makeWindow : IO ()
+makeWindow = do
+  made <- CreateWindow "test" 600 600 600 11600 0x00000004
+  putStrLn $ show made
+  
 main : IO ()
 main = do
     --drivers <- GetNumVideoDrivers
     --driver <- GetCurrentVideoDriver
-    init <- Init 32
+    doInit
+    makeWindow
+    --window <- HackCreateWindow
+    --clip <- GetClipboardText
+    --putStrLn $ show clip
+    Delay 1000
     num <- GetDisplayBounds 0
     mode <- GetDisplayMode 0 0
     putStrLn $ join' num mode

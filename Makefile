@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-g -O0
 LIBS=-lSDL2
-SRCS = SDL/idris_SDL_video.c SDL/idris_SDL_mouse.c
+SRCS = SDL/idris_SDL_video.c SDL/idris_SDL_mouse.c SDL/idris_SDL_clipboard.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(OBJS)
@@ -9,7 +9,6 @@ all: $(OBJS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< $(LIBS) 
-#	gcc -g -O0 -c SDL/idris_SDL_video.c -lSDL2
 
 clean:
 	rm -rf driver *~ *.ibc *.o

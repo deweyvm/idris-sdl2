@@ -16,6 +16,13 @@ GetError = do
     return result
     
 public
-Init : Int -> IO Int
-Init flag =  mkForeign (FFun "SDL_Init" [FInt] FInt) flag
+Init : Int -> IO (Maybe String)
+Init flags = do
+    success <- mkForeign (FFun "SDL_Init" [FInt] FInt) flags
+    if (success /= 0)
+      then do
+        errorString <- GetError
+        return $ Just errorString
+      else do
+        return Nothing
 

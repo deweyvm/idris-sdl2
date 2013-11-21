@@ -25,4 +25,9 @@ int idris_getDesktopDisplayMode_h();
 int idris_getDesktopDisplayMode_refresh_rate();
 void* idris_getDesktopDisplayMode_driverdata();
 
+int idris_SDL_CreateWindow(const char* title, int x, int y, int w, int h, Uint32 flags);
+SDL_Window* idris_SDL_CreateWindow_window();
+
+SDL_Window* create();
+
 #endif /*IDRIS_SDL_VIDEO_H*/

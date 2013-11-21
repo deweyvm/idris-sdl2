@@ -3,13 +3,16 @@ module SDL.Video
 import SDL.Common
 import SDL.SDL
 import SDL.Rect
-
+import Data.Bits {-for .or-}
 %include C "SDL2/SDL_video.h"
 %include C "SDL/idris_SDL_video.h"
 %link C "idris_SDL_video.o"
 
 public
 data Window = mkWindow Ptr
+
+instance Show Window where
+    show x = "Window"
 
 public
 GetNumVideoDrivers : IO Int
@@ -157,3 +160,55 @@ GetDesktopDisplayMode displayIndex = do
                                      <$> getDesktopDisplayMode_refresh_rate
                                      <$> getDesktopDisplayMode_driverdata
         return $ Right mode
+
+
+
+data WindowFlags = WindowFullscreen
+                 | WindowOpengl
+                 | WindowShown
+                 | WindowHidden
+                 | WindowBorderless
+                 | WindowResizable
+                 | WindowMinimized
+                 | WindowMaximized
+                 | WindowInputGrabbed
+                 | WindowInputFocus
+                 | WindowMouseFocus
+                 | WindowFullscreenDesktop
+                 | WindowForeign
+                   
+instance Flag WindowFlags where
+    toBits WindowFullscreen         = 0x00000001
+    toBits WindowOpengl             = 0x00000002
+    toBits WindowShown              = 0x00000004
+    toBits WindowHidden             = 0x00000008
+    toBits WindowBorderless         = 0x00000010
+    toBits WindowResizable          = 0x00000020
+    toBits WindowMinimized          = 0x00000040
+    toBits WindowMaximized          = 0x00000080
+    toBits WindowInputGrabbed       = 0x00000100
+    toBits WindowInputFocus         = 0x00000200
+    toBits WindowMouseFocus         = 0x00000400
+    toBits WindowFullscreenDesktop  = (toBits WindowFullscreen) `or32` 0x00001000
+    toBits WindowForeign            = 0x00000800
+
+--we check if the window was created successfully
+checkCreateWindow :  String -> Int -> Int -> Int -> Int -> Bits32 -> IO Int
+checkCreateWindow title x y w h flags =
+  (mkForeign (FFun "idris_SDL_CreateWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h flags)
+  
+getCreateWindow : IO Window
+getCreateWindow = mkWindow `map` (mkForeign (FFun "idris_SDL_CreateWindow_window" [] FPtr))
+
+public
+CreateWindow : String -> Int -> Int -> Int -> Int -> Bits32 -> IO (Either String Window)
+CreateWindow title x y w h flags = do
+    status <- checkCreateWindow title x y w h flags
+    if (status == 0)
+      then do
+        errorString <- GetError
+        return $ Left errorString
+      else do
+        ptr <- getCreateWindow
+        return $ Right ptr
+
