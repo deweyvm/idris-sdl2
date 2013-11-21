@@ -84,26 +84,30 @@ instance Show DisplayMode where
     show (mkDisplayMode format w h refresh_rate _) =
         "DisplayMode " ++ (show format) ++ " " ++ (show w) ++ " " ++ (show h) ++ " " ++ show (refresh_rate)
 
+sharedDisplayMode_format : IO Bits32
+sharedDisplayMode_format =
+  mkForeign (FFun "idris_sharedDisplayMode_format" [] FBits32)
+             
+sharedDisplayMode_w : IO Int
+sharedDisplayMode_w =
+  mkForeign (FFun "idris_sharedDisplayMode_w" [] FInt)
+  
+sharedDisplayMode_h : IO Int
+sharedDisplayMode_h =
+  mkForeign (FFun "idris_sharedDisplayMode_h" [] FInt)
+
+sharedDisplayMode_refresh_rate : IO Int
+sharedDisplayMode_refresh_rate =
+  mkForeign (FFun "idris_sharedDisplayMode_refresh_rate" [] FInt)
+  
+sharedDisplayMode_driverdata : IO Ptr
+sharedDisplayMode_driverdata =
+  mkForeign (FFun "idris_sharedDisplayMode_driverdata" [] FPtr)
+
+
 checkGetDisplayMode : Int -> Int -> IO Int
 checkGetDisplayMode displayIndex modeIndex =
     mkForeign (FFun "idris_SDL_getDisplayMode" [FInt, FInt] FInt) displayIndex modeIndex
-
-getDisplayMode_format : IO Bits32
-getDisplayMode_format = mkForeign (FFun "idris_SDL_getDisplayMode_format" [] FBits32)
-
-getDisplayMode_w : IO Int
-getDisplayMode_w = mkForeign (FFun "idris_SDL_getDisplayMode_w" [] FInt)
-
-getDisplayMode_h : IO Int
-getDisplayMode_h = mkForeign (FFun "idris_SDL_getDisplayMode_h" [] FInt)
-
-getDisplayMode_refresh_rate : IO Int
-getDisplayMode_refresh_rate =
-    mkForeign (FFun "idris_SDL_getDisplayMode_refresh_rate" [] FInt)
-
-getDisplayMode_driverdata : IO Ptr
-getDisplayMode_driverdata =
-    mkForeign (FFun "idris_SDL_getDisplayMode_driverdata" [] FPtr)
 
 public
 GetDisplayMode : Int -> Int -> IO (Either String DisplayMode)
@@ -114,37 +118,17 @@ GetDisplayMode displayIndex modeIndex = do
         err <- GetError
         return $ Left err
       else do
-        mode <- [| mkDisplayMode getDisplayMode_format
-                                 getDisplayMode_w
-                                 getDisplayMode_h
-                                 getDisplayMode_refresh_rate
-                                 getDisplayMode_driverdata |]
+        mode <- [| mkDisplayMode sharedDisplayMode_format
+                                 sharedDisplayMode_w
+                                 sharedDisplayMode_h
+                                 sharedDisplayMode_refresh_rate
+                                 sharedDisplayMode_driverdata |]
         return $ Right mode
         
 checkGetDesktopDisplayMode : Int -> IO Int
 checkGetDesktopDisplayMode displayIndex = 
-      mkForeign (FFun "idris_getDesktopDisplayMode" [FInt] FInt) displayIndex
+      mkForeign (FFun "idris_SDL_getDesktopDisplayMode" [FInt] FInt) displayIndex
 
-
-getDesktopDisplayMode_format : IO Bits32
-getDesktopDisplayMode_format =
-    mkForeign (FFun "idris_getDesktopDisplayMode_format" [] FBits32)
-
-getDesktopDisplayMode_w : IO Int
-getDesktopDisplayMode_w =
-      mkForeign (FFun "idris_getDesktopDisplayMode_w" [] FInt)
-
-getDesktopDisplayMode_h : IO Int
-getDesktopDisplayMode_h =
-    mkForeign (FFun "idris_getDesktopDisplayMode_h" [] FInt)
-
-getDesktopDisplayMode_refresh_rate : IO Int
-getDesktopDisplayMode_refresh_rate =
-      mkForeign (FFun "idris_getDesktopDisplayMode_refresh_rate" [] FInt)
-
-getDesktopDisplayMode_driverdata : IO Ptr
-getDesktopDisplayMode_driverdata =
-    mkForeign (FFun "idris_getDesktopDisplayMode_driverdata" [] FPtr)
 
 GetDesktopDisplayMode : Int -> IO (Either String DisplayMode)
 GetDesktopDisplayMode displayIndex = do
@@ -154,13 +138,29 @@ GetDesktopDisplayMode displayIndex = do
         err <- GetError
         return $ Left err
       else do
-        mode <- return mkDisplayMode <$> getDesktopDisplayMode_format
-                                     <$> getDesktopDisplayMode_w
-                                     <$> getDesktopDisplayMode_h
-                                     <$> getDesktopDisplayMode_refresh_rate
-                                     <$> getDesktopDisplayMode_driverdata
+        mode <- return mkDisplayMode <$> sharedDisplayMode_format
+                                     <$> sharedDisplayMode_w
+                                     <$> sharedDisplayMode_h
+                                     <$> sharedDisplayMode_refresh_rate
+                                     <$> sharedDisplayMode_driverdata
         return $ Right mode
 
+--fixme code clones
+public
+GetCurrentDisplayMode : Int -> IO (Either String DisplayMode)
+GetCurrentDisplayMode displayIndex = do
+    isValid <- checkGetDesktopDisplayMode displayIndex 
+    if (isValid /= 0)
+      then do
+        err <- GetError
+        return $ Left err
+      else do
+        mode <- return mkDisplayMode <$> sharedDisplayMode_format
+                                     <$> sharedDisplayMode_w
+                                     <$> sharedDisplayMode_h
+                                     <$> sharedDisplayMode_refresh_rate
+                                     <$> sharedDisplayMode_driverdata
+        return $ Right mode
 
 
 data WindowFlags = WindowFullscreen
