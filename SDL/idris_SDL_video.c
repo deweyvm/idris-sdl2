@@ -51,8 +51,6 @@ void* idris_sharedDisplayMode_driverdata() {
   return sharedDisplayMode_mode.driverdata;
 }
 
-
-
 int idris_SDL_getDisplayMode(int displayIndex, int modeIndex) {
   return idris_sharedDisplayMode2(displayIndex, modeIndex, SDL_GetDisplayMode);
 }
@@ -65,18 +63,39 @@ int idris_SDL_getCurrentDisplayMode(int displayIndex) {
   return idris_sharedDisplayMode(displayIndex, SDL_GetCurrentDisplayMode);
 }
 
+int idris_SDL_getClosestDisplayMode(int displayIndex, Uint32 format, int w, int h, int refresh_rate, void* driverdata) {
+  SDL_DisplayMode mode;
+  mode.format = format;
+  mode.w = w;
+  mode.h = h;
+  mode.refresh_rate = refresh_rate;
+  mode.driverdata = mode.driverdata;
+  SDL_DisplayMode* closest = SDL_GetClosestDisplayMode(displayIndex, &mode, &sharedDisplayMode_mode);
+  return closest != NULL;
+}
+
+int idris_SDL_SetWindowDisplayMode(SDL_Window* window, Uint32 format, int w, int h, int refresh_rate, void* driverdata) {
+  SDL_DisplayMode mode;
+  mode.format = format;
+  mode.w = w;
+  mode.h = h;
+  mode.refresh_rate = refresh_rate;
+  mode.driverdata = mode.driverdata;
+  return SDL_SetWindowDisplayMode(window, &mode);
+}
+
+
 //fixme -- reference to window is lost
 static SDL_Window* createWindow_window;
 int idris_SDL_CreateWindow(const char* title, int x, int y, int w, int h, Uint32 flags) { 
-  //hypothesis -- window is being optimized away?
-  createWindow_window = SDL_CreateWindow(title, x, y, w, h, SDL_WINDOW_OPENGL);
-  printf("upper window is %08X\n", createWindow_window);
-  
+  createWindow_window = SDL_CreateWindow(title, x, y, w, h, flags);
   return createWindow_window != NULL;
 }
 
 SDL_Window* idris_SDL_CreateWindow_window() {
-  printf("lower window is %08X\n", createWindow_window);
   return createWindow_window;
 }
 
+int idris_SDL_getWindowDisplayMode(SDL_Window* window) {
+  return SDL_GetWindowDisplayMode(window, &sharedDisplayMode_mode);
+}

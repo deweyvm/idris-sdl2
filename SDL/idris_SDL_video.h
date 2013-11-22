@@ -21,8 +21,14 @@ void* idris_sharedDisplayMode_driverdata();
 int idris_SDL_getDisplayMode(int displayIndex, int modeIndex);
 int idris_SDL_getDesktopDisplayMode(int displayIndex);
 int idris_SDL_getCurrentDisplayMode(int displayIndex);
+int idris_SDL_getClosestDisplayMode(int displayIndex, Uint32 format, int w, int h, int refresh_rate, void* driverdata);
+
+int idris_SDL_SetWindowDisplayMode(SDL_Window* window, Uint32 format, int w, int h, int refresh_rate, void* driverdata);
 
 int idris_SDL_CreateWindow(const char* title, int x, int y, int w, int h, Uint32 flags);
+
+int idris_SDL_getWindowDisplayMode(SDL_Window* window);
+
 SDL_Window* idris_SDL_CreateWindow_window();
 
 #endif /*IDRIS_SDL_VIDEO_H*/

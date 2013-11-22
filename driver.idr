@@ -22,10 +22,17 @@ doInit : IO ()
 doInit = do
     init <- Init 7231
     putStrLn $ show init
-    
+
+printFormat : Either String Window -> IO ()
+printFormat (Left err) = return ()
+printFormat (Right win) = do
+    fmt <- GetWindowPixelFormat win
+    putStrLn $ show fmt
+
 makeWindow : IO ()
 makeWindow = do
   made <- CreateWindow "test" 600 600 600 11600 0x00000004
+  printFormat made
   putStrLn $ show made
   
 main : IO ()
