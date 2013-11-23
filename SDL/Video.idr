@@ -12,6 +12,9 @@ import Data.Bits
 public
 data Window = mkWindow Ptr
 
+public
+data Surface = mkSurface Ptr
+
 instance Show Window where
     show x = "Window"
 
@@ -219,7 +222,7 @@ checkCreateWindow title x y w h flags =
   (mkForeign (FFun "idris_SDL_CreateWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h flags)
   
 getCreateWindow : IO Window
-getCreateWindow = mkWindow `map` (mkForeign (FFun "idris_SDL_CreateWindow_window" [] FPtr))
+getCreateWindow = mkWindow `map` (mkForeign (FFun "idris_sharedWindow" [] FPtr))
 
 public
 CreateWindow : String -> Int -> Int -> Int -> Int -> Bits32 -> IO (Either String Window)
@@ -232,4 +235,57 @@ CreateWindow title x y w h flags = do
       else do
         ptr <- getCreateWindow
         return $ Right ptr
+
+public
+CreateWindowFrom : Ptr -> IO (Either String Window)
+CreateWindowFrom ptr = do
+    success <- mkForeign (FFun "idris_SDL_createWindowFrom" [FPtr] FInt) ptr
+    if (success /= 0)
+      then do
+        errorString <- GetError
+        return $ Left errorString
+      else do
+        ptr <- mkForeign (FFun "idris_SDL_sharedWindow" [] FPtr)
+        return $ Right (mkWindow ptr)
+        
+--is 0 a legit return value here?
+public
+GetWindowID : Window -> IO Bits32
+GetWindowID (mkWindow ptr) =
+    mkForeign (FFun "SDL_GetWindowID" [FPtr] FBits32) ptr
+
+public
+GetWindowFromID : Bits32 -> IO (Either String Window)
+GetWindowFromID id = do
+    success <- mkForeign (FFun "idris_SDL_getWindowFromID" [FBits32] FInt) id
+    if (success /= 0)
+      then do
+        errorString <- GetError
+        return $ Left errorString
+      else do
+        ptr <- mkForeign (FFun "idris_sharedWindow" [] FPtr)
+        return $ Right (mkWindow ptr)
+
+--this function might be pure
+public
+GetWindowFlags : Window -> IO Bits32
+GetWindowFlags (mkWindow ptr) =
+    mkForeign (FFun "SDL_GetWindowFlags" [FPtr] FBits32) ptr
+
+public
+SetWindowTitle : Window -> String -> IO ()
+SetWindowTitle (mkWindow ptr) title =
+    mkForeign (FFun "SDL_SetWindowTitle" [FPtr, FString] FUnit) ptr title
+
+--this function might be pure
+public
+GetWindowTitle : Window -> IO String
+GetWindowTitle (mkWindow ptr) =
+    mkForeign (FFun "SDL_GetWindowTitle" [FPtr] FString) ptr
+
+--does this function indicate when failing?  
+public
+SetWindowIcon : Window -> Surface -> IO ()
+SetWindowIcon (mkWindow win) (mkSurface surf) =
+    mkForeign (FFun "SDL_SetWindowIcon" [FPtr, FPtr] FUnit) win surf
 

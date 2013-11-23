@@ -85,17 +85,29 @@ int idris_SDL_SetWindowDisplayMode(SDL_Window* window, Uint32 format, int w, int
 }
 
 
-//fixme -- reference to window is lost
-static SDL_Window* createWindow_window;
-int idris_SDL_CreateWindow(const char* title, int x, int y, int w, int h, Uint32 flags) { 
-  createWindow_window = SDL_CreateWindow(title, x, y, w, h, flags);
-  return createWindow_window != NULL;
+//fixme -- reference to window is lost on the C side, does this matter?
+SDL_Window* idris_sharedWindow_window;
+
+SDL_Window* idris_sharedWindow() {
+  return idris_sharedWindow_window;
 }
 
-SDL_Window* idris_SDL_CreateWindow_window() {
-  return createWindow_window;
+
+int idris_SDL_CreateWindow(const char* title, int x, int y, int w, int h, Uint32 flags) { 
+  idris_sharedWindow_window = SDL_CreateWindow(title, x, y, w, h, flags);
+  return idris_sharedWindow_window != NULL;
 }
 
 int idris_SDL_getWindowDisplayMode(SDL_Window* window) {
   return SDL_GetWindowDisplayMode(window, &sharedDisplayMode_mode);
+}
+
+int idris_SDL_createWindowFrom(const void* data) {
+  idris_sharedWindow_window = SDL_CreateWindowFrom(data);
+  return idris_sharedWindow_window != NULL;
+}
+
+int idris_SDL_getWindowFromID(Uint32 id) {
+  idris_sharedWindow_window = SDL_GetWindowFromID(id);
+  return idris_sharedWindow_window != NULL;
 }
