@@ -14,7 +14,7 @@ int idris_SDL_getDisplayBounds_y() {
 }
 
 int idris_SDL_getDisplayBounds_w() {
-  return getDisplayBounds_rect.w;  
+  return getDisplayBounds_rect.w;
 }
 
 int idris_SDL_getDisplayBounds_h() {
@@ -36,7 +36,7 @@ Uint32 idris_sharedDisplayMode_format() {
 }
 
 int idris_sharedDisplayMode_w() {
-  return sharedDisplayMode_mode.w; 
+  return sharedDisplayMode_mode.w;
 }
 
 int idris_sharedDisplayMode_h() {
@@ -93,7 +93,7 @@ SDL_Window* idris_sharedWindow() {
 }
 
 
-int idris_SDL_CreateWindow(const char* title, int x, int y, int w, int h, Uint32 flags) { 
+int idris_SDL_CreateWindow(const char* title, int x, int y, int w, int h, Uint32 flags) {
   idris_sharedWindow_window = SDL_CreateWindow(title, x, y, w, h, flags);
   return idris_sharedWindow_window != NULL;
 }
@@ -110,4 +110,45 @@ int idris_SDL_createWindowFrom(const void* data) {
 int idris_SDL_getWindowFromID(Uint32 id) {
   idris_sharedWindow_window = SDL_GetWindowFromID(id);
   return idris_sharedWindow_window != NULL;
+}
+
+int idris_shared_x;
+int idris_shared_y;
+
+int idris_getShared_x() {
+    return idris_shared_x;
+}
+
+int idris_getShared_y() {
+    return idris_shared_y;
+}
+
+void fillSharedXY(SDL_Window* window, void (setter)(SDL_Window*, int*, int*)) {
+    setter(window, &idris_shared_x, &idris_shared_y);
+}
+
+void idris_SDL_getWindowPosition(SDL_Window* window) {
+    fillSharedXY(window, SDL_GetWindowPosition);
+}
+
+void idris_SDL_getWindowSize(SDL_Window* window) {
+    fillSharedXY(window, SDL_GetWindowSize);
+}
+
+void idris_SDL_getWindowMinimumSize(SDL_Window* window) {
+    fillSharedXY(window, SDL_GetWindowMinimumSize);
+}
+
+void idris_SDL_getWindowMaximumSize(SDL_Window* window) {
+    fillSharedXY(window, SDL_GetWindowMaximumSize);
+}
+
+SDL_Surface* idris_getWindowSurface_surface;
+int idris_SDL_getWindowSurface(SDL_Window* window) {
+    idris_getWindowSurface_surface = SDL_GetWindowSurface(window);
+    return idris_getWindowSurface_surface != NULL;
+}
+
+SDL_Surface* idris_SDL_getWindwoSurface_surface() {
+    return idris_getWindowSurface_surface;
 }

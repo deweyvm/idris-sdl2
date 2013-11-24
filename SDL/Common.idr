@@ -13,14 +13,18 @@ or32 a b = a `prim__orB32` b
 class Flag a where
     toBits : a -> Bits32
 
-
+total
 fromSDLBool : Int -> Bool
 fromSDLBool 0 = False
 fromSDLBool _ = True
 
+total
 toSDLBool : Bool -> Int
 toSDLBool True = 1
 toSDLBool False = 0
 
-(<**>) : a -> a -> a -> (a, a, a)
-(<**>) x y z = (x, y, z)
+(<**->) : a -> a -> a -> (a, a, a)
+(<**->) x y z = (x, y, z)
+
+(<*->) : a -> a -> (a, a)
+(<*->) x y = (x, y)

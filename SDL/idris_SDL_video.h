@@ -35,4 +35,15 @@ int idris_SDL_createWindowFrom(const void* data);
 
 int idris_SDL_getWindowFromID(Uint32 id);
 
+//shared across all functions in video which output (only) two int params
+int idris_getShared_x();
+int idris_getShared_y();
+
+void idris_SDL_getWindowPosition(SDL_Window* window);
+void idris_SDL_getWindowSize(SDL_Window* window);
+void idris_SDL_getWindowMinimumSize(SDL_Window* window);
+void idris_SDL_getWindowMaximumSize(SDL_Window* window);
+
+int idris_SDL_getWindowSurface(SDL_Window* window);
+SDL_Surface* idris_SDL_getWindwoSurface_surface();
 #endif /*IDRIS_SDL_VIDEO_H*/
