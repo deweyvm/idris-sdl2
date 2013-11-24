@@ -24,20 +24,20 @@ data SystemCursor = SystemCursorArrow
                   | SystemCursorHand
                   | NumSystemCursors
 
-instance Flag SystemCursor where
-    toBits SystemCursorArrow     = 0x00
-    toBits SystemCursorIbeam     = 0x01
-    toBits SystemCursorWait      = 0x02
-    toBits SystemCursorCrosshair = 0x03
-    toBits SystemCursorWaitarrow = 0x04
-    toBits SystemCursorSizenwse  = 0x05
-    toBits SystemCursorSizenesw  = 0x06
-    toBits SystemCursorSizewe    = 0x07
-    toBits SystemCursorSizens    = 0x08
-    toBits SystemCursorSizeall   = 0x09
-    toBits SystemCursorNo        = 0x0A
-    toBits SystemCursorHand      = 0x0B
-    toBits NumSystemCursors      = 0x0C
+instance Flag Bits32 SystemCursor where
+    toFlag SystemCursorArrow     = 0x00
+    toFlag SystemCursorIbeam     = 0x01
+    toFlag SystemCursorWait      = 0x02
+    toFlag SystemCursorCrosshair = 0x03
+    toFlag SystemCursorWaitarrow = 0x04
+    toFlag SystemCursorSizenwse  = 0x05
+    toFlag SystemCursorSizenesw  = 0x06
+    toFlag SystemCursorSizewe    = 0x07
+    toFlag SystemCursorSizens    = 0x08
+    toFlag SystemCursorSizeall   = 0x09
+    toFlag SystemCursorNo        = 0x0A
+    toFlag SystemCursorHand      = 0x0B
+    toFlag NumSystemCursors      = 0x0C
 
 --todo - button states
 
@@ -108,7 +108,7 @@ CreateColorCursor (mkSurface ptr) hot_x hot_y =
 public
 CreateSystemCursor : SystemCursor -> IO Cursor
 CreateSystemCursor flag =
-    mkCursor `map` (mkForeign (FFun "SDL_CreateSystemCursor" [FBits32] FPtr) (toBits flag))
+    mkCursor `map` (mkForeign (FFun "SDL_CreateSystemCursor" [FBits32] FPtr) (toFlag flag))
 
 
 public

@@ -12,8 +12,11 @@ total
 or32 : Bits32 -> Bits32 -> Bits32
 or32 a b = a `prim__orB32` b
 
-class Flag a where
-    toBits : a -> Bits32
+class Flag n a where
+    toFlag : a -> n
+
+class Readable rep val where
+    read : rep -> Maybe val
 
 total
 fromSDLBool : Int -> Bool
@@ -42,6 +45,18 @@ trySDL action = do
         return $ Just errorString
       else do
         return Nothing
+
+trySDLRes : IO Int -> IO a -> IO (Either String a)
+trySDLRes try' getter = do
+    success <- fromSDLBool `map` try'
+    if (not success)
+      then do
+        errorString <- GetError
+        return $ Left errorString
+      else do
+        res <- getter
+        return $ Right res
+
 
 (<**->) : a -> a -> a -> (a, a, a)
 (<**->) x y z = (x, y, z)

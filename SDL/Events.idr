@@ -1,7 +1,6 @@
 module SDL.Events
 
 import SDL.Common
-import Prelude.Applicative
 
 %include C "SDL2/SDL_events.h"
 
@@ -47,48 +46,48 @@ data EventType = FirstEvent
                | UserEvent
                | LastEvent
 
-instance Flag EventType where
-    toBits FirstEvent               = 0x000
-    toBits Quit                     = 0x100
-    toBits AppTerminating           = 0x101
-    toBits AppLowMemory             = 0x102
-    toBits AppWillEnterBackground   = 0x103
-    toBits AppDidEnterBackground    = 0x104
-    toBits AppWillEnterForeground   = 0x105
-    toBits AppDidEnterForeground    = 0x106
-    toBits WindowEvent              = 0x200
-    toBits SyswmEvent               = 0x201
-    toBits KeyDown                  = 0x300
-    toBits KeyUp                    = 0x301
-    toBits TextEditing              = 0x302
-    toBits TextInput                = 0x303
-    toBits MouseMotion              = 0x400
-    toBits MouseButtonDown          = 0x401
-    toBits MouseButtonUp            = 0x402
-    toBits MouseWheel               = 0x403
-    toBits JoyAxisMotion            = 0x600
-    toBits JoyBallMotion            = 0x601
-    toBits JoyHatMotion             = 0x602
-    toBits JoyButtonDown            = 0x603
-    toBits JoyButtonUp              = 0x604
-    toBits JoyDeviceAdded           = 0x605
-    toBits JoyDeviceRemoved         = 0x606
-    toBits ControllerAxisMotion     = 0x650
-    toBits ControllerButtonDown     = 0x651
-    toBits ControllerButtonUp       = 0x652
-    toBits ControllerDeviceAdded    = 0x653
-    toBits ControllerDeviceRemoved  = 0x654
-    toBits ControllerDeviceRemapped = 0x655
-    toBits FingerDown               = 0x700
-    toBits FingerUp                 = 0x701
-    toBits FingerMotion             = 0x702
-    toBits DollarGesture            = 0x800
-    toBits DollarRecord             = 0x801
-    toBits MultiGesture             = 0x802
-    toBits ClipboardUpdate          = 0x900
-    toBits DropFile                 = 0x1000
-    toBits UserEvent                = 0x8000
-    toBits LastEvent                = 0xFFFF
+instance Flag Bits32 EventType where
+    toFlag FirstEvent               = 0x000
+    toFlag Quit                     = 0x100
+    toFlag AppTerminating           = 0x101
+    toFlag AppLowMemory             = 0x102
+    toFlag AppWillEnterBackground   = 0x103
+    toFlag AppDidEnterBackground    = 0x104
+    toFlag AppWillEnterForeground   = 0x105
+    toFlag AppDidEnterForeground    = 0x106
+    toFlag WindowEvent              = 0x200
+    toFlag SyswmEvent               = 0x201
+    toFlag KeyDown                  = 0x300
+    toFlag KeyUp                    = 0x301
+    toFlag TextEditing              = 0x302
+    toFlag TextInput                = 0x303
+    toFlag MouseMotion              = 0x400
+    toFlag MouseButtonDown          = 0x401
+    toFlag MouseButtonUp            = 0x402
+    toFlag MouseWheel               = 0x403
+    toFlag JoyAxisMotion            = 0x600
+    toFlag JoyBallMotion            = 0x601
+    toFlag JoyHatMotion             = 0x602
+    toFlag JoyButtonDown            = 0x603
+    toFlag JoyButtonUp              = 0x604
+    toFlag JoyDeviceAdded           = 0x605
+    toFlag JoyDeviceRemoved         = 0x606
+    toFlag ControllerAxisMotion     = 0x650
+    toFlag ControllerButtonDown     = 0x651
+    toFlag ControllerButtonUp       = 0x652
+    toFlag ControllerDeviceAdded    = 0x653
+    toFlag ControllerDeviceRemoved  = 0x654
+    toFlag ControllerDeviceRemapped = 0x655
+    toFlag FingerDown               = 0x700
+    toFlag FingerUp                 = 0x701
+    toFlag FingerMotion             = 0x702
+    toFlag DollarGesture            = 0x800
+    toFlag DollarRecord             = 0x801
+    toFlag MultiGesture             = 0x802
+    toFlag ClipboardUpdate          = 0x900
+    toFlag DropFile                 = 0x1000
+    toFlag UserEvent                = 0x8000
+    toFlag LastEvent                = 0xFFFF
 
 data Event = CommonEvent Bits32 Bits32
 
@@ -102,7 +101,7 @@ PumpEvents = mkForeign (FFun "SDL_PumpEvents" [] FUnit)
 public
 HasEvent : EventType -> IO Bool
 HasEvent t = do
-    [| fromSDLBool (mkForeign (FFun "SDL_HasEvent" [FBits32] FInt) (toBits t)) |]
+    [| fromSDLBool (mkForeign (FFun "SDL_HasEvent" [FBits32] FInt) (toFlag t)) |]
 
 --should use some generalized filterM here
 findA : (Applicative f, Traversable ls) => (a -> f Bool) -> ls a -> f Bool
@@ -114,7 +113,7 @@ HasEvents xs = findA HasEvent xs
 
 public
 FlushEvent : EventType -> IO ()
-FlushEvent t = mkForeign (FFun "SDL_FlushEvent" [FBits32] FUnit) (toBits t)
+FlushEvent t = mkForeign (FFun "SDL_FlushEvent" [FBits32] FUnit) (toFlag t)
 
 public
 FlushEvents : List EventType -> IO ()

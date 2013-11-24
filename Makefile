@@ -4,7 +4,8 @@ LIBS=-lSDL2
 SRCS = SDL/idris_SDL_video.c \
        SDL/idris_SDL_mouse.c \
        SDL/idris_SDL_clipboard.c \
-       SDL/idris_SDL_bits.c
+       SDL/idris_SDL_bits.c \
+       SDL/idris_SDL_gamecontroller.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(OBJS)

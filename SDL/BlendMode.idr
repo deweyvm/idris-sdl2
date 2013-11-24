@@ -7,8 +7,8 @@ data BlendMode = BlendModeNone
                | BlendModeAdd
                | BlendModeMod
 
-instance Flag BlendMode where
-    toBits BlendModeNone  = 0x0
-    toBits BlendModeBlend = 0x1
-    toBits BlendModeAdd   = 0x2
-    toBits BlendModeMod   = 0x4
+instance Flag Bits32 BlendMode where
+    toFlag BlendModeNone  = 0x0
+    toFlag BlendModeBlend = 0x1
+    toFlag BlendModeAdd   = 0x2
+    toFlag BlendModeMod   = 0x4

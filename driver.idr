@@ -46,9 +46,8 @@ main = do
     --driver <- GetCurrentVideoDriver
     doInit
     makeWindow
-    --window <- HackCreateWindow
-    --clip <- GetClipboardText
-    --putStrLn $ show clip
+    clip <- GetClipboardText
+    putStrLn $ "Clipboard: " ++ (show clip)
     Delay 1000
     num <- GetDisplayBounds 0
     mode <- GetDisplayMode 0 0

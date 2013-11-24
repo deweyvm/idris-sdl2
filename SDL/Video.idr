@@ -198,20 +198,20 @@ data WindowFlags = WindowFullscreen
                  | WindowFullscreenDesktop
                  | WindowForeign
 
-instance Flag WindowFlags where
-    toBits WindowFullscreen         = 0x00000001
-    toBits WindowOpengl             = 0x00000002
-    toBits WindowShown              = 0x00000004
-    toBits WindowHidden             = 0x00000008
-    toBits WindowBorderless         = 0x00000010
-    toBits WindowResizable          = 0x00000020
-    toBits WindowMinimized          = 0x00000040
-    toBits WindowMaximized          = 0x00000080
-    toBits WindowInputGrabbed       = 0x00000100
-    toBits WindowInputFocus         = 0x00000200
-    toBits WindowMouseFocus         = 0x00000400
-    toBits WindowFullscreenDesktop  = (toBits WindowFullscreen) `or32` 0x00001000
-    toBits WindowForeign            = 0x00000800
+instance Flag Bits32 WindowFlags where
+    toFlag WindowFullscreen         = 0x00000001
+    toFlag WindowOpengl             = 0x00000002
+    toFlag WindowShown              = 0x00000004
+    toFlag WindowHidden             = 0x00000008
+    toFlag WindowBorderless         = 0x00000010
+    toFlag WindowResizable          = 0x00000020
+    toFlag WindowMinimized          = 0x00000040
+    toFlag WindowMaximized          = 0x00000080
+    toFlag WindowInputGrabbed       = 0x00000100
+    toFlag WindowInputFocus         = 0x00000200
+    toFlag WindowMouseFocus         = 0x00000400
+    toFlag WindowFullscreenDesktop  = (toFlag WindowFullscreen) `or32` 0x00001000
+    toFlag WindowForeign            = 0x00000800
 
 --we check if the window was created successfully
 checkCreateWindow :  String -> Int -> Int -> Int -> Int -> Bits32 -> IO Int

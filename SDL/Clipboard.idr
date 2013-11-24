@@ -19,7 +19,8 @@ SetClipboardText text = do
 
 public
 HasClipboardText : IO Bool
-HasClipboardText = fromSDLBool `map` (mkForeign (FFun "SDL_HasClipboardText" [] FInt))
+HasClipboardText = do
+    [| fromSDLBool (mkForeign (FFun "SDL_HasClipboardText" [] FInt)) |]
 
 --this segfaults if there is no window
 public
@@ -28,15 +29,16 @@ GetClipboardText = do
     hasText <- HasClipboardText
     if (not hasText)
        then
-         return $ Left ""
+         return $ Left "<empty>"
        else do
-         err <- mkForeign (FFun "idris_SDL_GetClipboardText" [] FInt)
-         if (err /= 0)
+         success <- [| fromSDLBool (mkForeign (FFun "idris_SDL_getClipboardText" [] FInt)) |]
+         if (not success)
            then do
              errorString <- GetError
              return $ Left errorString
            else do
-             contents <- mkForeign (FFun "idris_SDL_GetClipboardText_string" [] FString)
+             contents <- mkForeign (FFun "idris_SDL_getClipboardText_string" [] FString)
+             mkForeign (FFun "idris_SDL_getClipboardText_free" [] FUnit)
              return $ Right contents
 
 
