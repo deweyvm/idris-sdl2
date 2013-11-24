@@ -61,8 +61,8 @@ public
 GetMouseState : IO MouseState
 GetMouseState = [| mkMouseState getMouseState_x
                                 getMouseState_y
-                                getMouseState_state |] 
-    
+                                getMouseState_state |]
+
 
 getRelativeMouseState_x : IO Int
 getRelativeMouseState_x = mkForeign (FFun "idris_SDL_GetRelativeMouseState_x" [] FInt)
@@ -90,7 +90,7 @@ WarpMouseInWindow (mkWindow ptr) x y =
 public
 SetRelativeMouseMode : Bool -> IO Bool
 SetRelativeMouseMode b = fromSDLBool `map` (mkForeign (FFun "SDL_SetRelativeMouseMode" [FInt] FInt) (toSDLBool b))
-  
+
 public
 GetRelativeMouseMode : IO Bool
 GetRelativeMouseMode = fromSDLBool `map` (mkForeign (FFun "SDL_GetRelativeMouseMode" [] FInt))
@@ -140,9 +140,11 @@ ShowCursor : IO ()
 ShowCursor = do
     mkForeign (FFun "SDL_ShowCursor" [FInt] FInt) 1
     return ()
-    
+
 public
 HideCursor : IO ()
 HideCursor = do
     mkForeign (FFun "SDL_ShowCursor" [FInt] FInt) 0
     return ()
+
+--skipped for now: event flags

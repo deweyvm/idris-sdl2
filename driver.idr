@@ -7,6 +7,11 @@ import SDL.Rect
 import SDL.Video
 import SDL.Mouse
 import SDL.Clipboard
+import SDL.Events
+import SDL.BlendMode
+import SDL.CPUInfo
+import SDL.Bits
+import SDL.GameController
 
 join' : (Show a, Show b) => Either String a -> Either String b -> String
 join' (Left s) (Left r) = s ++ r
@@ -34,7 +39,7 @@ makeWindow = do
   made <- CreateWindow "test" 600 600 600 11600 0x00000004
   printFormat made
   putStrLn $ show made
-  
+
 main : IO ()
 main = do
     --drivers <- GetNumVideoDrivers

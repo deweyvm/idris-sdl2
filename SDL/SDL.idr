@@ -1,20 +1,25 @@
 module SDL.SDL
 
 import SDL.Common
+import SDL.Error
 
-%include C "SDL2/SDL_error.h"
+%include C "SDL2/SDL.h"
 
-public
-ClearError : IO ()
-ClearError = mkForeign (FFun "SDL_ClearError" [] FUnit)
 
-public
-GetError : IO String
-GetError = do
-    result <- mkForeign (FFun "SDL_GetError" [] FString)
-    ClearError
-    return result
-    
+{-
+    Not implemented:
+        SDL_assert.h
+        SDL_atomic.h - use idris's concurrency
+        SDL_config.h - SDL internal stuff
+        SDL_endian.h
+
+
+
+
+
+
+-}
+
 public
 Init : Int -> IO (Maybe String)
 Init flags = do

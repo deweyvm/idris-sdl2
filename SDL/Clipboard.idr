@@ -1,6 +1,7 @@
 module SDL.Clipboard
 
 import SDL.SDL
+
 %include C "SDL2/SDL_clipboard.h"
 %include C "SDL/idris_SDL_clipboard.h"
 %link C "idris_SDL_clipboard.o"

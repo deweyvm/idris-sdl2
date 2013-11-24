@@ -1,4 +1,6 @@
-module Common
+module SDL.Common
+
+import SDL.Error
 
 %lib C "SDL2"
 
@@ -22,6 +24,24 @@ total
 toSDLBool : Bool -> Int
 toSDLBool True = 1
 toSDLBool False = 0
+
+getError : IO String
+getError = do
+    errorString <- GetError
+    if (errorString == "")
+      then return "<unknown>"
+      else return errorString
+
+-- wraps IO actions which can fail
+trySDL : IO Int -> IO (Maybe String)
+trySDL action = do
+    success <- action
+    if (success /= 0)
+      then do
+        errorString <- getError
+        return $ Just errorString
+      else do
+        return Nothing
 
 (<**->) : a -> a -> a -> (a, a, a)
 (<**->) x y z = (x, y, z)
