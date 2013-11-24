@@ -87,23 +87,23 @@ instance Show DisplayMode where
 
 sharedDisplayMode_format : IO Bits32
 sharedDisplayMode_format =
-  mkForeign (FFun "idris_sharedDisplayMode_format" [] FBits32)
+    mkForeign (FFun "idris_sharedDisplayMode_format" [] FBits32)
 
 sharedDisplayMode_w : IO Int
 sharedDisplayMode_w =
-  mkForeign (FFun "idris_sharedDisplayMode_w" [] FInt)
+    mkForeign (FFun "idris_sharedDisplayMode_w" [] FInt)
 
 sharedDisplayMode_h : IO Int
 sharedDisplayMode_h =
-  mkForeign (FFun "idris_sharedDisplayMode_h" [] FInt)
+    mkForeign (FFun "idris_sharedDisplayMode_h" [] FInt)
 
 sharedDisplayMode_refresh_rate : IO Int
 sharedDisplayMode_refresh_rate =
-  mkForeign (FFun "idris_sharedDisplayMode_refresh_rate" [] FInt)
+    mkForeign (FFun "idris_sharedDisplayMode_refresh_rate" [] FInt)
 
 sharedDisplayMode_driverdata : IO Ptr
 sharedDisplayMode_driverdata =
-  mkForeign (FFun "idris_sharedDisplayMode_driverdata" [] FPtr)
+    mkForeign (FFun "idris_sharedDisplayMode_driverdata" [] FPtr)
 
 
 checkGetDisplayMode : Int -> Int -> IO Int
@@ -216,7 +216,7 @@ instance Flag WindowFlags where
 --we check if the window was created successfully
 checkCreateWindow :  String -> Int -> Int -> Int -> Int -> Bits32 -> IO Int
 checkCreateWindow title x y w h flags =
-  (mkForeign (FFun "idris_SDL_CreateWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h flags)
+    (mkForeign (FFun "idris_SDL_CreateWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h flags)
 
 getCreateWindow : IO Window
 getCreateWindow = mkWindow `map` (mkForeign (FFun "idris_sharedWindow" [] FPtr))
