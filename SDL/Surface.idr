@@ -14,7 +14,7 @@ data SurfaceFlag = SWSurface
                  | RLEAccel
                  | DontFree
 
-instance Flag Bits32 SurfaceFlag where
+instance Flag Bits32 SurfaceFlags where
     toFlag SWSurface =  0x00000000
     toFlag PreAlloc  =  0x00000001
     toFlag RLEAccel  =  0x00000002
