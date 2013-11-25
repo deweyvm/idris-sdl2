@@ -96,11 +96,8 @@ instance Flag Int GameControllerAxis where
     toFlag ControllerAxisTriggerRight =  5
     toFlag ControllerAxisMax          =  6
 
-GetAxes : List GameControllerAxis
-GetAxes = [ControllerAxisInvalid, ControllerAxisLeftX, ControllerAxisLeftY, ControllerAxisRightX, ControllerAxisRightY, ControllerAxisTriggerLeft, ControllerAxisTriggerRight, ControllerAxisMax]
-
-instance Readable Int GameControllerAxis where
-    read i = find (\x => toFlag x == i) GetAxes
+instance Enumerable GameControllerAxis where
+    enumerate = [ControllerAxisInvalid, ControllerAxisLeftX, ControllerAxisLeftY, ControllerAxisRightX, ControllerAxisRightY, ControllerAxisTriggerLeft, ControllerAxisTriggerRight, ControllerAxisMax]
 
 public
 GameControllerGetAxisFromString : String -> IO (Maybe GameControllerAxis)
@@ -112,3 +109,74 @@ public
 GameControllerGetStringForAxis : GameControllerAxis -> IO String
 GameControllerGetStringForAxis axis =
     mkForeign (FFun "SDL_GameControllerGetStringForAxis" [FInt] FString) (toFlag axis)
+
+--skipped: not sure how this struct is used
+--extern DECLSPEC SDL_GameControllerButtonBind SDLCALL
+--SDL_GameControllerGetBindForAxis(SDL_GameController *gamecontroller,
+--                                 SDL_GameControllerAxis axis);
+public
+GameControllerGetAxis : GameController -> GameControllerAxis -> IO Int
+GameControllerGetAxis (mkGameController ptr) axis = do
+    mkForeign (FFun "SDL_GameControllerGetAxis" [FPtr, FInt] FInt) ptr (toFlag axis)
+
+data GameControllerButton = ControllerButtonA
+                          | ControllerButtonB
+                          | ControllerButtonX
+                          | ControllerButtonY
+                          | ControllerButtonBack
+                          | ControllerButtonGuide
+                          | ControllerButtonStart
+                          | ControllerButtonLeftStick
+                          | ControllerButtonRightStick
+                          | ControllerButtonLeftShoulder
+                          | ControllerButtonRightShoulder
+                          | ControllerButtonDpadUp
+                          | ControllerButtonDpadDown
+                          | ControllerButtonDpadLeft
+                          | ControllerButtonDpadRight
+                          | ControllerButtonMax
+
+instance Flag Int GameControllerButton where
+    toFlag ControllerButtonA             = 0
+    toFlag ControllerButtonB             = 1
+    toFlag ControllerButtonX             = 2
+    toFlag ControllerButtonY             = 3
+    toFlag ControllerButtonBack          = 4
+    toFlag ControllerButtonGuide         = 5
+    toFlag ControllerButtonStart         = 6
+    toFlag ControllerButtonLeftStick     = 7
+    toFlag ControllerButtonRightStick    = 8
+    toFlag ControllerButtonLeftShoulder  = 9
+    toFlag ControllerButtonRightShoulder = 10
+    toFlag ControllerButtonDpadUp        = 11
+    toFlag ControllerButtonDpadDown      = 12
+    toFlag ControllerButtonDpadLeft      = 13
+    toFlag ControllerButtonDpadRight     = 14
+    toFlag ControllerButtonMax           = 15
+
+instance Enumerable GameControllerButton where
+    enumerate = [ControllerButtonA, ControllerButtonB, ControllerButtonX, ControllerButtonY, ControllerButtonBack, ControllerButtonGuide, ControllerButtonStart, ControllerButtonLeftStick, ControllerButtonRightStick, ControllerButtonLeftShoulder, ControllerButtonRightShoulder, ControllerButtonDpadUp, ControllerButtonDpadDown, ControllerButtonDpadLeft, ControllerButtonDpadRight, ControllerButtonMax]
+
+public
+GameControllerGetButtonFromString : String -> IO (Maybe GameControllerButton)
+GameControllerGetButtonFromString str = do
+    retval <- mkForeign (FFun "SDL_GameControllerGetButtonFromString" [FString] FInt) str
+    return $ read retval
+
+public
+GameControllerGetStringForButton : GameControllerButton -> IO String
+GameControllerGetStringForButton b =
+    mkForeign (FFun "SDL_GameControllerGetStringForButton" [FInt] FString) (toFlag b)
+
+--skipped: not sure how this struct is used
+--extern DECLSPEC SDL_GameControllerButtonBind SDLCALL
+--SDL_GameControllerGetBindForButton(SDL_GameController *gamecontroller,
+--                                   SDL_GameControllerButton button);
+
+GameControllerGetButton : GameController -> GameControllerButton -> IO Int
+GameControllerGetButton (mkGameController ptr) c =
+    mkForeign (FFun "SDL_GameControllerGetButton" [FPtr, FInt] FInt) ptr (toFlag c)
+
+GameControllerClose : GameController -> IO ()
+GameControllerClose (mkGameController ptr) =
+    mkForeign (FFun "SDL_GameControllerClose" [FPtr] FUnit) ptr

@@ -15,8 +15,11 @@ or32 a b = a `prim__orB32` b
 class Flag n a where
     toFlag : a -> n
 
-class Readable rep val where
-    read : rep -> Maybe val
+class Enumerable a where
+    enumerate : List a
+
+read : (Eq a, Enumerable e, Flag a e) => a -> Maybe e
+read i = find (\x => toFlag x == i) enumerate
 
 total
 fromSDLBool : Int -> Bool
