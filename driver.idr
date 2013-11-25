@@ -13,12 +13,6 @@ import SDL.CPUInfo
 import SDL.Bits
 import SDL.GameController
 
-join' : (Show a, Show b) => Either String a -> Either String b -> String
-join' (Left s) (Left r) = s ++ r
-join' (Right s) (Left r) = (show s) ++ r
-join' (Right s) (Right r) = (show s) ++ (show r)
-join' (Left s) (Right r) = s ++ (show r)
-
 instance (Show a, Show b) => Show (Either a b) where
    show (Left l) = "Left " ++ (show l)
    show (Right r) = "Right " ++ (show r)
@@ -51,4 +45,5 @@ main = do
     Delay 1000
     num <- GetDisplayBounds 0
     mode <- GetDisplayMode 0 0
-    putStrLn $ join' num mode
+    putStrLn $ show num
+    putStrLn $ show mode

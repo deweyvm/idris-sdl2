@@ -13,11 +13,6 @@ import SDL.Error
         SDL_config.h - SDL internal stuff
         SDL_endian.h
 
-
-
-
-
-
 -}
 
 public

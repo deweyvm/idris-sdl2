@@ -15,6 +15,11 @@ or32 a b = a `prim__orB32` b
 class Flag n a where
     toFlag : a -> n
 
+
+
+sumBits : (Flag Bits32 a) => List a -> Bits32
+sumBits flags = foldl prim__orB32 0x0 (map toFlag flags)
+
 class Enumerable a where
     enumerate : List a
 
