@@ -58,7 +58,7 @@ getError = do
 --fixme rename
 trySDL : IO Int -> IO (Maybe String)
 trySDL action = do
-    success <- fromSDLBool `map` action
+    success <- [| fromSDLBool action |]
     if (not success)
       then do
         errorString <- getError
@@ -69,7 +69,7 @@ trySDL action = do
 --fixme rename --> getOrElse and flip arguments
 trySDLRes : IO Int -> IO a -> IO (Either String a)
 trySDLRes try' getter = do
-    success <- fromSDLBool `map` try'
+    success <- [| fromSDLBool try' |]
     if (not success)
       then do
         errorString <- GetError

@@ -46,7 +46,7 @@ data MouseState = mkMouseState Int Int Bits32
 --fixme -- return maybe for null ptr
 public
 GetMouseFocus : IO Window
-GetMouseFocus = mkWindow `map` (mkForeign (FFun "SDL_GetMouseFocus" [] FPtr))
+GetMouseFocus = [| mkWindow (mkForeign (FFun "SDL_GetMouseFocus" [] FPtr)) |]
 
 getMouseState_x : IO Int
 getMouseState_x = mkForeign (FFun "idris_SDL_GetMouseState_x" [] FInt)
@@ -89,26 +89,26 @@ WarpMouseInWindow (mkWindow ptr) x y =
 --        need to check sdl's behavior
 public
 SetRelativeMouseMode : Bool -> IO Bool
-SetRelativeMouseMode b = fromSDLBool `map` (mkForeign (FFun "SDL_SetRelativeMouseMode" [FInt] FInt) (toSDLBool b))
+SetRelativeMouseMode b = [| fromSDLBool (mkForeign (FFun "SDL_SetRelativeMouseMode" [FInt] FInt) (toSDLBool b)) |]
 
 public
 GetRelativeMouseMode : IO Bool
-GetRelativeMouseMode = fromSDLBool `map` (mkForeign (FFun "SDL_GetRelativeMouseMode" [] FInt))
+GetRelativeMouseMode = [| fromSDLBool (mkForeign (FFun "SDL_GetRelativeMouseMode" [] FInt)) |]
 
 public
 CreateCursor : Ptr -> Ptr -> Int -> Int -> Int -> Int -> IO Cursor
 CreateCursor data' mask w h hot_x hot_y =
-    mkCursor `map` (mkForeign (FFun "SDL_CreateCursor" [FPtr, FPtr, FInt, FInt, FInt, FInt] FPtr) data' mask w h hot_x hot_y)
+    [| mkCursor (mkForeign (FFun "SDL_CreateCursor" [FPtr, FPtr, FInt, FInt, FInt, FInt] FPtr) data' mask w h hot_x hot_y) |]
 
 public
 CreateColorCursor : Surface -> Int -> Int -> IO Cursor
 CreateColorCursor (mkSurface ptr) hot_x hot_y =
-    mkCursor `map` (mkForeign (FFun "SDL_CreateColorCursor" [FPtr, FInt, FInt] FPtr) ptr hot_x hot_y)
+    [| mkCursor (mkForeign (FFun "SDL_CreateColorCursor" [FPtr, FInt, FInt] FPtr) ptr hot_x hot_y) |]
 
 public
 CreateSystemCursor : SystemCursor -> IO Cursor
 CreateSystemCursor flag =
-    mkCursor `map` (mkForeign (FFun "SDL_CreateSystemCursor" [FBits32] FPtr) (toFlag flag))
+    [| mkCursor (mkForeign (FFun "SDL_CreateSystemCursor" [FBits32] FPtr) (toFlag flag)) |]
 
 
 public
@@ -119,12 +119,12 @@ SetCursor (mkCursor ptr) =
 --fixme, may return NULL
 public
 GetCursor : IO Cursor {- Either String Cursor-}
-GetCursor = mkCursor `map` (mkForeign (FFun "SDL_GetCursor" [] FPtr))
+GetCursor = [| mkCursor (mkForeign (FFun "SDL_GetCursor" [] FPtr)) |]
 
 --fixme, may return NULL
 public
 GetDefaultCursor : IO Cursor {- Either String Cursor-}
-GetDefaultCursor = mkCursor `map` (mkForeign (FFun "SDL_GetDefaultCursor" [] FPtr))
+GetDefaultCursor = [| mkCursor (mkForeign (FFun "SDL_GetDefaultCursor" [] FPtr)) |]
 
 public
 FreeCursor : Cursor -> IO ()
@@ -133,18 +133,17 @@ FreeCursor (mkCursor ptr) =
 
 public
 IsCursorVisible : IO Bool
-IsCursorVisible = fromSDLBool `map` (mkForeign (FFun "SDL_ShowCursor" [FInt] FInt) (-1))
+IsCursorVisible = [| fromSDLBool (mkForeign (FFun "SDL_ShowCursor" [FInt] FInt) (-1)) |]
 
 public
 ShowCursor : IO ()
 ShowCursor = do
-    mkForeign (FFun "SDL_ShowCursor" [FInt] FInt) 1
-    return ()
+    mkForeign (FFun "SDL_ShowCursor" [FInt] FUnit) 1
+
 
 public
 HideCursor : IO ()
 HideCursor = do
-    mkForeign (FFun "SDL_ShowCursor" [FInt] FInt) 0
-    return ()
+    mkForeign (FFun "SDL_ShowCursor" [FInt] FUnit) 0
 
 --skipped for now: event flags

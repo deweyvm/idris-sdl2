@@ -24,14 +24,16 @@ GameControllerMappingForGUID : JoystickGUID -> IO (Either String String)
 GameControllerMappingForGUID (mkJoystickGUID bits) = do
     trySDLRes
         (mkForeign (FFun "idris_SDL_gameControllerMappingForGUID" [FBits16x8] FInt) bits)
-        (mkForeign (FFun "idris_gameController_sharedString_string" [] FString) <$ freeSharedString)
+        (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
+            <$ freeSharedString)
 
 public
 GameControllerMapping : GameController -> IO (Either String String)
 GameControllerMapping (mkGameController ptr) = do
     trySDLRes
         (mkForeign (FFun "idris_SDL_gameControllerMapping" [FPtr] FInt) ptr)
-        (mkForeign (FFun "idris_gameController_sharedString_string" [] FString) <$ freeSharedString)
+        (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
+            <$ freeSharedString)
 
 public
 IsGameController : Int -> IO Bool
@@ -43,16 +45,16 @@ GameControllerNameForIndex : Int -> IO (Either String String)
 GameControllerNameForIndex id = do
     trySDLRes
         (mkForeign (FFun "idris_SDL_gameControllerNameForIndex" [FInt] FInt) id)
-        (mkForeign (FFun "idris_gameController_sharedString_string" [] FString) <$ freeSharedString)
+        (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
+            <$ freeSharedString)
 
 public
 GameControllerOpen : Int -> IO (Either String GameController)
 GameControllerOpen id = do
     trySDLRes
         (mkForeign (FFun "idris_SDL_gameControllerOpen" [FInt] FInt) id)
-        (mkGameController `map` (mkForeign (FFun "idris_sharedGameController_controller" [] FPtr)))
+        [| mkGameController (mkForeign (FFun "idris_sharedGameController_controller" [] FPtr)) |]
 
--- pure?
 public
 GameControllerName : GameController -> IO String
 GameControllerName (mkGameController ptr) =
@@ -101,9 +103,8 @@ instance Enumerable GameControllerAxis where
 
 public
 GameControllerGetAxisFromString : String -> IO (Maybe GameControllerAxis)
-GameControllerGetAxisFromString str = do
-    retval <- mkForeign (FFun "SDL_GameControllerGetAxisFromString" [FString] FInt) str
-    return $ read retval
+GameControllerGetAxisFromString str =
+    [| read (mkForeign (FFun "SDL_GameControllerGetAxisFromString" [FString] FInt) str) |]
 
 public
 GameControllerGetStringForAxis : GameControllerAxis -> IO String
@@ -116,7 +117,7 @@ GameControllerGetStringForAxis axis =
 --                                 SDL_GameControllerAxis axis);
 public
 GameControllerGetAxis : GameController -> GameControllerAxis -> IO Int
-GameControllerGetAxis (mkGameController ptr) axis = do
+GameControllerGetAxis (mkGameController ptr) axis =
     mkForeign (FFun "SDL_GameControllerGetAxis" [FPtr, FInt] FInt) ptr (toFlag axis)
 
 data GameControllerButton = ControllerButtonA
@@ -160,8 +161,7 @@ instance Enumerable GameControllerButton where
 public
 GameControllerGetButtonFromString : String -> IO (Maybe GameControllerButton)
 GameControllerGetButtonFromString str = do
-    retval <- mkForeign (FFun "SDL_GameControllerGetButtonFromString" [FString] FInt) str
-    return $ read retval
+    [| read (mkForeign (FFun "SDL_GameControllerGetButtonFromString" [FString] FInt) str) |]
 
 public
 GameControllerGetStringForButton : GameControllerButton -> IO String

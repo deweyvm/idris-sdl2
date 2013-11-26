@@ -61,7 +61,6 @@ getDisplayBounds_w = mkForeign (FFun "idris_SDL_getDisplayBounds_w" [] FInt)
 getDisplayBounds_h : IO Int
 getDisplayBounds_h =  mkForeign (FFun "idris_SDL_getDisplayBounds_h" [] FInt)
 
---fixme
 public
 GetDisplayBounds : Int -> IO (Either String Rect)
 GetDisplayBounds index = do
@@ -213,7 +212,7 @@ checkCreateWindow title x y w h flags =
     (mkForeign (FFun "idris_SDL_CreateWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h (sumBits flags))
 
 getCreateWindow : IO Window
-getCreateWindow = mkWindow `map` (mkForeign (FFun "idris_sharedWindow" [] FPtr))
+getCreateWindow = [| mkWindow (mkForeign (FFun "idris_sharedWindow" [] FPtr)) |]
 
 public
 CreateWindow : String -> Int -> Int -> Int -> Int -> List WindowFlag -> IO (Either String Window)
@@ -227,7 +226,7 @@ CreateWindowFrom : Ptr -> IO (Either String Window)
 CreateWindowFrom ptr = do
     trySDLRes
         (mkForeign (FFun "idris_SDL_createWindowFrom" [FPtr] FInt) ptr)
-        (mkWindow `map` (mkForeign (FFun "idris_SDL_sharedWindow" [] FPtr)))
+        [| mkWindow (mkForeign (FFun "idris_SDL_sharedWindow" [] FPtr)) |]
 
 --is 0 a legit return value here?
 public
@@ -240,7 +239,7 @@ GetWindowFromID : Bits32 -> IO (Either String Window)
 GetWindowFromID id = do
     trySDLRes
         (mkForeign (FFun "idris_SDL_getWindowFromID" [FBits32] FInt) id)
-        (mkWindow `map` (mkForeign (FFun "idris_sharedWindow" [] FPtr)))
+        [| mkWindow (mkForeign (FFun "idris_sharedWindow" [] FPtr)) |]
 
 --this function might be pure
 --fixme return List WindowFlag somehow
@@ -374,7 +373,7 @@ GetWindowSurface : Window -> IO (Either String Surface)
 GetWindowSurface (mkWindow ptr) = do
     trySDLRes
         (mkForeign (FFun "idris_SDL_getWindowSurface" [FPtr] FInt) ptr)
-        (mkSurface `map` mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FPtr))
+        [| mkSurface (mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FPtr)) |]
 
 public
 UpdateWindowSurface : Window -> IO (Maybe String)

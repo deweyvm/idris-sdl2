@@ -6,12 +6,10 @@ import SDL.SDL
 %include C "SDL/idris_SDL_clipboard.h"
 %link C "idris_SDL_clipboard.o"
 
---fixme
 public
 SetClipboardText : String -> IO (Maybe String)
 SetClipboardText text = do
-    trySDL
-        (mkForeign (FFun "SDL_SetClipboardText" [FString] FInt) text)
+    trySDL (mkForeign (FFun "SDL_SetClipboardText" [FString] FInt) text)
 
 public
 HasClipboardText : IO Bool
@@ -28,14 +26,10 @@ GetClipboardText = do
        then
          return $ Left "<empty>"
        else do
-         success <- [| fromSDLBool (mkForeign (FFun "idris_SDL_getClipboardText" [] FInt)) |]
-         if (not success)
-           then do
-             errorString <- GetError
-             return $ Left errorString
-           else do
-             contents <- mkForeign (FFun "idris_SDL_getClipboardText_string" [] FString)
-             mkForeign (FFun "idris_SDL_getClipboardText_free" [] FUnit)
-             return $ Right contents
+         trySDLRes
+             (mkForeign (FFun "idris_SDL_getClipboardText" [] FInt))
+             (mkForeign (FFun "idris_SDL_getClipboardText_string" [] FString)
+                <$ mkForeign (FFun "idris_SDL_getClipboardText_free" [] FUnit))
+
 
 
