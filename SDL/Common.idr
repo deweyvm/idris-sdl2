@@ -15,8 +15,7 @@ or32 a b = a `prim__orB32` b
 class Flag n a where
     toFlag : a -> n
 
-
-
+total
 sumBits : (Flag Bits32 a) => List a -> Bits32
 sumBits flags = foldl prim__orB32 0x0 (map toFlag flags)
 
@@ -43,17 +42,19 @@ getError = do
       then return "<unknown>"
       else return errorString
 
+--fixme - probably no one will check this -- how to solve?
 -- wraps IO actions which can fail
 trySDL : IO Int -> IO (Maybe String)
 trySDL action = do
-    success <- action
-    if (success /= 0)
+    success <- fromSDLBool `map` action
+    if (not success)
       then do
         errorString <- getError
         return $ Just errorString
       else do
         return Nothing
 
+--fixme rename
 trySDLRes : IO Int -> IO a -> IO (Either String a)
 trySDLRes try' getter = do
     success <- fromSDLBool `map` try'
@@ -65,9 +66,14 @@ trySDLRes try' getter = do
         res <- getter
         return $ Right res
 
-
+infixl 6 <**->
 (<**->) : a -> a -> a -> (a, a, a)
 (<**->) x y z = (x, y, z)
 
+infixl 6 <*->
 (<*->) : a -> a -> (a, a)
 (<*->) x y = (x, y)
+
+join : List String -> String
+join [] = ""
+join (x::xs) = foldr (++) "" xs

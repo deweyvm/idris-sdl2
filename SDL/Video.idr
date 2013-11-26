@@ -58,6 +58,7 @@ getDisplayBounds_w = mkForeign (FFun "idris_SDL_getDisplayBounds_w" [] FInt)
 getDisplayBounds_h : IO Int
 getDisplayBounds_h =  mkForeign (FFun "idris_SDL_getDisplayBounds_h" [] FInt)
 
+--fixme
 public
 GetDisplayBounds : Int -> IO (Either String Rect)
 GetDisplayBounds index = do
@@ -110,6 +111,7 @@ checkGetDisplayMode : Int -> Int -> IO Int
 checkGetDisplayMode displayIndex modeIndex =
     mkForeign (FFun "idris_SDL_getDisplayMode" [FInt, FInt] FInt) displayIndex modeIndex
 
+--fixme
 getSharedDisplayMode : Int -> IO (Either String DisplayMode)
 getSharedDisplayMode isValid =
     if (isValid /= 0)
@@ -184,55 +186,52 @@ GetWindowPixelFormat : Window -> IO Bits32
 GetWindowPixelFormat (mkWindow ptr) =
     mkForeign (FFun "SDL_GetWindowPixelFormat" [FPtr] FBits32) ptr
 
-data WindowFlags = WindowFullscreen
-                 | WindowOpengl
-                 | WindowShown
-                 | WindowHidden
-                 | WindowBorderless
-                 | WindowResizable
-                 | WindowMinimized
-                 | WindowMaximized
-                 | WindowInputGrabbed
-                 | WindowInputFocus
-                 | WindowMouseFocus
-                 | WindowFullscreenDesktop
-                 | WindowForeign
+public
+data WindowFlag = WindowFullscreen
+                | WindowOpengl
+                | WindowShown
+                | WindowHidden
+                | WindowBorderless
+                | WindowResizable
+                | WindowMinimized
+                | WindowMaximized
+                | WindowInputGrabbed
+                | WindowInputFocus
+                | WindowMouseFocus
+                | WindowFullscreenDesktop
+                | WindowForeign
 
-instance Flag Bits32 WindowFlags where
-    toFlag WindowFullscreen         = 0x00000001
-    toFlag WindowOpengl             = 0x00000002
-    toFlag WindowShown              = 0x00000004
-    toFlag WindowHidden             = 0x00000008
-    toFlag WindowBorderless         = 0x00000010
-    toFlag WindowResizable          = 0x00000020
-    toFlag WindowMinimized          = 0x00000040
-    toFlag WindowMaximized          = 0x00000080
-    toFlag WindowInputGrabbed       = 0x00000100
-    toFlag WindowInputFocus         = 0x00000200
-    toFlag WindowMouseFocus         = 0x00000400
-    toFlag WindowFullscreenDesktop  = (toFlag WindowFullscreen) `or32` 0x00001000
-    toFlag WindowForeign            = 0x00000800
+instance Flag Bits32 WindowFlag where
+    toFlag WindowFullscreen        = 0x00000001
+    toFlag WindowOpengl            = 0x00000002
+    toFlag WindowShown             = 0x00000004
+    toFlag WindowHidden            = 0x00000008
+    toFlag WindowBorderless        = 0x00000010
+    toFlag WindowResizable         = 0x00000020
+    toFlag WindowMinimized         = 0x00000040
+    toFlag WindowMaximized         = 0x00000080
+    toFlag WindowInputGrabbed      = 0x00000100
+    toFlag WindowInputFocus        = 0x00000200
+    toFlag WindowMouseFocus        = 0x00000400
+    toFlag WindowFullscreenDesktop = (toFlag WindowFullscreen) `or32` 0x00001000
+    toFlag WindowForeign           = 0x00000800
 
 --we check if the window was created successfully
-checkCreateWindow :  String -> Int -> Int -> Int -> Int -> Bits32 -> IO Int
+checkCreateWindow :  String -> Int -> Int -> Int -> Int -> List WindowFlag -> IO Int
 checkCreateWindow title x y w h flags =
-    (mkForeign (FFun "idris_SDL_CreateWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h flags)
+    (mkForeign (FFun "idris_SDL_CreateWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h (sumBits flags))
 
 getCreateWindow : IO Window
 getCreateWindow = mkWindow `map` (mkForeign (FFun "idris_sharedWindow" [] FPtr))
 
 public
-CreateWindow : String -> Int -> Int -> Int -> Int -> Bits32 -> IO (Either String Window)
+CreateWindow : String -> Int -> Int -> Int -> Int -> List WindowFlag -> IO (Either String Window)
 CreateWindow title x y w h flags = do
-    status <- checkCreateWindow title x y w h flags
-    if (status == 0)
-      then do
-        errorString <- GetError
-        return $ Left errorString
-      else do
-        ptr <- getCreateWindow
-        return $ Right ptr
+    trySDLRes
+        (checkCreateWindow title x y w h flags)
+        getCreateWindow
 
+--fixme
 public
 CreateWindowFrom : Ptr -> IO (Either String Window)
 CreateWindowFrom ptr = do
@@ -264,6 +263,7 @@ GetWindowFromID id = do
         return $ Right (mkWindow ptr)
 
 --this function might be pure
+--fixme return List WindowFlag somehow
 public
 GetWindowFlags : Window -> IO Bits32
 GetWindowFlags (mkWindow ptr) =
@@ -292,7 +292,7 @@ SetWindowData : Window -> String -> Ptr -> IO Ptr
 SetWindowData (mkWindow win) name value =
     mkForeign (FFun "SDL_SetWindowData" [FPtr, FString, FPtr] FPtr) win name value
 
---fixme: return Maybe Ptr. need to think about whether or not its valid for
+--fixme: return Maybe Ptr instead? need to think about whether or not its valid for
 --    the user to store a null pointer in a window
 public
 GetWindowData : Window -> String -> IO Ptr
@@ -384,6 +384,7 @@ RestoreWindow : Window -> IO ()
 RestoreWindow (mkWindow ptr) =
     mkForeign (FFun "SDL_RestoreWindow" [FPtr] FUnit) ptr
 
+--fixme
 public
 SetWindowFullscreen : Window -> Bits32 -> IO (Maybe String)
 SetWindowFullscreen (mkWindow ptr) flags = do
@@ -395,6 +396,7 @@ SetWindowFullscreen (mkWindow ptr) flags = do
       else do
         return Nothing
 
+--fixme
 public
 GetWindowSurface : Window -> IO (Either String Surface)
 GetWindowSurface (mkWindow ptr) = do
@@ -407,6 +409,7 @@ GetWindowSurface (mkWindow ptr) = do
         surf <- mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FPtr)
         return $ Right (mkSurface surf)
 
+--fixme
 public
 UpdateWindowSurface : Window -> IO (Maybe String)
 UpdateWindowSurface (mkWindow ptr) = do
@@ -430,6 +433,7 @@ GetWindowGrab : Window -> IO Bool
 GetWindowGrab (mkWindow ptr) = do
     [| fromSDLBool (mkForeign (FFun "SDL_GetWindowGrab" [FPtr] FInt) ptr) |]
 
+--fixme
 public
 SetWindowBrightness : Window -> Float -> IO (Maybe String)
 SetWindowBrightness (mkWindow ptr) brightness = do
@@ -444,8 +448,6 @@ public
 GetWindowBrightness : Window -> IO Float
 GetWindowBrightness (mkWindow ptr) =
     mkForeign (FFun "SDL_GetWindowBrightness" [FPtr] FFloat) ptr
-
-
 
 public
 DestroyWindow : Window -> IO ()

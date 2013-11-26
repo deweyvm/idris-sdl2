@@ -103,7 +103,7 @@ HasEvent : EventType -> IO Bool
 HasEvent t = do
     [| fromSDLBool (mkForeign (FFun "SDL_HasEvent" [FBits32] FInt) (toFlag t)) |]
 
---should use some generalized filterM here
+--fixme: should use some generalized filterM here
 findA : (Applicative f, Traversable ls) => (a -> f Bool) -> ls a -> f Bool
 findA fun xs = (map (any id)) (sequence (map fun xs))
 

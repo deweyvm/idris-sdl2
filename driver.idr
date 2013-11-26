@@ -19,7 +19,7 @@ instance (Show a, Show b) => Show (Either a b) where
 
 doInit : IO ()
 doInit = do
-    init <- Init 7231
+    init <- Init [InitEverything]
     putStrLn $ show init
 
 printFormat : Either String Window -> IO ()
@@ -28,18 +28,19 @@ printFormat (Right win) = do
     fmt <- GetWindowPixelFormat win
     putStrLn $ show fmt
 
-makeWindow : IO ()
-makeWindow = do
-  made <- CreateWindow "test" 600 600 600 11600 0x00000004
-  printFormat made
-  putStrLn $ show made
+--makeWindow : IO ()
+--makeWindow = do
+--  made <- CreateWindow "test" 600 600 600 600 [WindowShown]
+--  printFormat made
+--  putStrLn $ show made
 
 main : IO ()
 main = do
     --drivers <- GetNumVideoDrivers
     --driver <- GetCurrentVideoDriver
     doInit
-    makeWindow
+    CreateWindow "test" 600 600 600 600 [WindowShown]
+    SetClipboardText "clipboard2"
     clip <- GetClipboardText
     putStrLn $ "Clipboard: " ++ (show clip)
     Delay 1000

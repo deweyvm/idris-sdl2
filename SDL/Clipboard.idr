@@ -6,16 +6,12 @@ import SDL.SDL
 %include C "SDL/idris_SDL_clipboard.h"
 %link C "idris_SDL_clipboard.o"
 
+--fixme
 public
 SetClipboardText : String -> IO (Maybe String)
 SetClipboardText text = do
-    err <- mkForeign (FFun "SDL_SetClipboardText" [FString] FInt) text
-    if (err /= 0)
-      then do
-        errorString <- GetError
-        return $ Just errorString
-      else
-        return Nothing
+    trySDL
+        (mkForeign (FFun "SDL_SetClipboardText" [FString] FInt) text)
 
 public
 HasClipboardText : IO Bool
@@ -23,6 +19,7 @@ HasClipboardText = do
     [| fromSDLBool (mkForeign (FFun "SDL_HasClipboardText" [] FInt)) |]
 
 --this segfaults if there is no window
+--fixme
 public
 GetClipboardText : IO (Either String String)
 GetClipboardText = do
