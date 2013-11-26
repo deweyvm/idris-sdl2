@@ -2,7 +2,7 @@
 
 SDL_Rect getDisplayBounds_rect;
 int idris_SDL_getDisplayBounds(int index) {
-  return SDL_GetDisplayBounds(index, &getDisplayBounds_rect);
+  return SDL_GetDisplayBounds(index, &getDisplayBounds_rect) == 0;
 }
 
 int idris_SDL_getDisplayBounds_x() {
@@ -24,11 +24,11 @@ int idris_SDL_getDisplayBounds_h() {
 SDL_DisplayMode sharedDisplayMode_mode;
 
 int idris_sharedDisplayMode(int displayIndex, int (displayGetter) (int, SDL_DisplayMode*)) {
-  return displayGetter(displayIndex, &sharedDisplayMode_mode);
+  return displayGetter(displayIndex, &sharedDisplayMode_mode) == 0;
 }
 
 int idris_sharedDisplayMode2(int displayIndex, int modeIndex, int (displayGetter) (int, int, SDL_DisplayMode*)) {
-  return displayGetter(displayIndex, modeIndex, &sharedDisplayMode_mode);
+  return displayGetter(displayIndex, modeIndex, &sharedDisplayMode_mode) == 0;
 }
 
 Uint32 idris_sharedDisplayMode_format() {

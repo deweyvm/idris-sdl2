@@ -9,6 +9,9 @@ import Data.Bits
 %include C "SDL/idris_SDL_video.h"
 %link C "idris_SDL_video.o"
 
+--a window must never be null. We must assure through our C wrapper that a null
+-- pointer is never passed to mkWindow
+--fixme: should be abstract
 public
 data Window = mkWindow Ptr
 
@@ -62,17 +65,12 @@ getDisplayBounds_h =  mkForeign (FFun "idris_SDL_getDisplayBounds_h" [] FInt)
 public
 GetDisplayBounds : Int -> IO (Either String Rect)
 GetDisplayBounds index = do
-    isValid <- checkGetDisplayBounds index
-    if (isValid /= 0)
-      then do
-        err <- GetError
-        return $ Left err
-      else do
-        rect <- [| mkRect getDisplayBounds_x
-                          getDisplayBounds_y
-                          getDisplayBounds_w
-                          getDisplayBounds_h |]
-        return $ Right rect
+    trySDLRes
+        (checkGetDisplayBounds index)
+        [| mkRect getDisplayBounds_x
+                  getDisplayBounds_y
+                  getDisplayBounds_w
+                  getDisplayBounds_h |]
 
 
 public
@@ -106,51 +104,53 @@ sharedDisplayMode_driverdata : IO Ptr
 sharedDisplayMode_driverdata =
     mkForeign (FFun "idris_sharedDisplayMode_driverdata" [] FPtr)
 
-
 checkGetDisplayMode : Int -> Int -> IO Int
 checkGetDisplayMode displayIndex modeIndex =
     mkForeign (FFun "idris_SDL_getDisplayMode" [FInt, FInt] FInt) displayIndex modeIndex
 
---fixme
-getSharedDisplayMode : Int -> IO (Either String DisplayMode)
-getSharedDisplayMode isValid =
-    if (isValid /= 0)
-      then do
-        err <- GetError
-        return $ Left err
-      else do
-        mode <- [| mkDisplayMode sharedDisplayMode_format
-                                 sharedDisplayMode_w
-                                 sharedDisplayMode_h
-                                 sharedDisplayMode_refresh_rate
-                                 sharedDisplayMode_driverdata |]
-        return $ Right mode
+getSharedDisplayMode : IO DisplayMode
+getSharedDisplayMode = do
+    [| mkDisplayMode sharedDisplayMode_format
+                     sharedDisplayMode_w
+                     sharedDisplayMode_h
+                     sharedDisplayMode_refresh_rate
+                     sharedDisplayMode_driverdata |]
+
 public
 GetDisplayMode : Int -> Int -> IO (Either String DisplayMode)
 GetDisplayMode displayIndex modeIndex = do
-    isValid <- checkGetDisplayMode displayIndex modeIndex
-    getSharedDisplayMode isValid
+    trySDLRes
+        (checkGetDisplayMode displayIndex modeIndex)
+        (getSharedDisplayMode)
 
 checkGetDesktopDisplayMode : Int -> IO Int
 checkGetDesktopDisplayMode displayIndex =
-      mkForeign (FFun "idris_SDL_getDesktopDisplayMode" [FInt] FInt) displayIndex
+    mkForeign (FFun "idris_SDL_getDesktopDisplayMode" [FInt] FInt) displayIndex
 
+public
 GetDesktopDisplayMode : Int -> IO (Either String DisplayMode)
 GetDesktopDisplayMode displayIndex = do
-    isValid <- checkGetDesktopDisplayMode displayIndex
-    getSharedDisplayMode isValid
+    trySDLRes
+        (checkGetDesktopDisplayMode displayIndex)
+        (getSharedDisplayMode)
+
+checkGetCurrentDisplayMode : Int -> IO Int
+checkGetCurrentDisplayMode displayIndex =
+    mkForeign (FFun "idris_SDL_getCurrentDisplayMode" [FInt] FInt) displayIndex
 
 public
 GetCurrentDisplayMode : Int -> IO (Either String DisplayMode)
 GetCurrentDisplayMode displayIndex = do
-    isValid <- checkGetDesktopDisplayMode displayIndex
-    getSharedDisplayMode isValid
+    trySDLRes
+        (checkGetCurrentDisplayMode displayIndex)
+        (getSharedDisplayMode)
 
 public
 GetClosestDisplayMode : Int -> DisplayMode -> IO (Either String DisplayMode)
 GetClosestDisplayMode displayIndex (mkDisplayMode format w h hz ddata) = do
-    isValid <- (mkForeign (FFun "idris_SDL_getClosestDisplayMode" [FInt, FBits32, FInt, FInt, FInt, FPtr] FInt) displayIndex format w h hz ddata)
-    getSharedDisplayMode isValid
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_getClosestDisplayMode" [FInt, FBits32, FInt, FInt, FInt, FPtr] FInt) displayIndex format w h hz ddata)
+        (getSharedDisplayMode)
 
 public
 GetWindowDisplayIndex : Window -> IO (Maybe Int)
@@ -160,27 +160,18 @@ GetWindowDisplayIndex (mkWindow ptr) = do
       -1 => Nothing
       n  => Just n
 
---code clones
---returns an error message on failure
 public
 SetWindowDisplayMode : Window -> DisplayMode -> IO (Maybe String)
 SetWindowDisplayMode (mkWindow ptr) (mkDisplayMode format w h hz ddata) = do
-    success <- mkForeign (FFun "idris_SDL_setWindowDisplayMode" [FPtr, FBits32, FInt, FInt, FInt, FPtr] FInt) ptr format w h hz ddata
-    if (success /= 0)
-      then do
-        errorString <- GetError
-        return $ Just errorString
-      else
-        return Nothing
+    trySDL (mkForeign (FFun "idris_SDL_setWindowDisplayMode" [FPtr, FBits32, FInt, FInt, FInt, FPtr] FInt) ptr format w h hz ddata)
 
 public
 GetWindowDisplayMode : Window -> IO (Either String DisplayMode)
 GetWindowDisplayMode (mkWindow ptr) = do
-    isValid <- mkForeign (FFun "idris_SDL_getWindowDisplayMode" [FPtr] FInt) ptr
-    getSharedDisplayMode isValid
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_getWindowDisplayMode" [FPtr] FInt) ptr)
+        (getSharedDisplayMode)
 
---shouldnt fail on account of a null window because we never allow a
---    a window to be null within idris
 public
 GetWindowPixelFormat : Window -> IO Bits32
 GetWindowPixelFormat (mkWindow ptr) =
@@ -213,7 +204,7 @@ instance Flag Bits32 WindowFlag where
     toFlag WindowInputGrabbed      = 0x00000100
     toFlag WindowInputFocus        = 0x00000200
     toFlag WindowMouseFocus        = 0x00000400
-    toFlag WindowFullscreenDesktop = (toFlag WindowFullscreen) `or32` 0x00001000
+    toFlag WindowFullscreenDesktop = (toFlag WindowFullscreen) `prim__orB32` 0x00001000
     toFlag WindowForeign           = 0x00000800
 
 --we check if the window was created successfully
@@ -231,18 +222,12 @@ CreateWindow title x y w h flags = do
         (checkCreateWindow title x y w h flags)
         getCreateWindow
 
---fixme
 public
 CreateWindowFrom : Ptr -> IO (Either String Window)
 CreateWindowFrom ptr = do
-    success <- mkForeign (FFun "idris_SDL_createWindowFrom" [FPtr] FInt) ptr
-    if (success /= 0)
-      then do
-        errorString <- GetError
-        return $ Left errorString
-      else do
-        ptr <- mkForeign (FFun "idris_SDL_sharedWindow" [] FPtr)
-        return $ Right (mkWindow ptr)
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_createWindowFrom" [FPtr] FInt) ptr)
+        (mkWindow `map` (mkForeign (FFun "idris_SDL_sharedWindow" [] FPtr)))
 
 --is 0 a legit return value here?
 public
@@ -253,14 +238,9 @@ GetWindowID (mkWindow ptr) =
 public
 GetWindowFromID : Bits32 -> IO (Either String Window)
 GetWindowFromID id = do
-    success <- mkForeign (FFun "idris_SDL_getWindowFromID" [FBits32] FInt) id
-    if (success /= 0)
-      then do
-        errorString <- GetError
-        return $ Left errorString
-      else do
-        ptr <- mkForeign (FFun "idris_sharedWindow" [] FPtr)
-        return $ Right (mkWindow ptr)
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_getWindowFromID" [FBits32] FInt) id)
+        (mkWindow `map` (mkForeign (FFun "idris_sharedWindow" [] FPtr)))
 
 --this function might be pure
 --fixme return List WindowFlag somehow
@@ -384,44 +364,22 @@ RestoreWindow : Window -> IO ()
 RestoreWindow (mkWindow ptr) =
     mkForeign (FFun "SDL_RestoreWindow" [FPtr] FUnit) ptr
 
---fixme
 public
 SetWindowFullscreen : Window -> Bits32 -> IO (Maybe String)
 SetWindowFullscreen (mkWindow ptr) flags = do
-    success <- mkForeign (FFun "SDL_SetWindowFullscreen" [FPtr, FBits32] FInt) ptr flags
-    if (success /= 0)
-      then do
-        errorString <- GetError
-        return $ Just errorString
-      else do
-        return Nothing
+    trySDL (mkForeign (FFun "SDL_SetWindowFullscreen" [FPtr, FBits32] FInt) ptr flags)
 
---fixme
 public
 GetWindowSurface : Window -> IO (Either String Surface)
 GetWindowSurface (mkWindow ptr) = do
-    success <- mkForeign (FFun "idris_SDL_getWindowSurface" [FPtr] FInt) ptr
-    if (success /= 0)
-      then do
-        errorString <- GetError
-        return $ Left errorString
-      else do
-        surf <- mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FPtr)
-        return $ Right (mkSurface surf)
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_getWindowSurface" [FPtr] FInt) ptr)
+        (mkSurface `map` mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FPtr))
 
---fixme
 public
 UpdateWindowSurface : Window -> IO (Maybe String)
 UpdateWindowSurface (mkWindow ptr) = do
-    success <- mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FInt)
-    if (success /= 0)
-      then do
-        errorString <- GetError
-        return $ Just errorString
-      else do
-        return Nothing
-
-
+    trySDL (mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FInt))
 
 public
 SetWindowGrab : Window -> Bool -> IO ()
@@ -437,13 +395,8 @@ GetWindowGrab (mkWindow ptr) = do
 public
 SetWindowBrightness : Window -> Float -> IO (Maybe String)
 SetWindowBrightness (mkWindow ptr) brightness = do
-    success <- mkForeign (FFun "SDL_SetWindowBrightness" [FPtr, FFloat] FInt) ptr brightness
-    if (success /= 0)
-      then do
-        errorString <- GetError
-        return $ Just errorString
-      else do
-        return Nothing
+    trySDL (mkForeign (FFun "SDL_SetWindowBrightness" [FPtr, FFloat] FInt) ptr brightness)
+
 public
 GetWindowBrightness : Window -> IO Float
 GetWindowBrightness (mkWindow ptr) =

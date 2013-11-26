@@ -35,6 +35,20 @@ instance Flag Bits32 InitFlag where
     toFlag InitNoParachute    = 0x00100000
     toFlag InitEverything     = 0x00001C3F
 
+instance Enumerable InitFlag where
+    enumerate = [InitTimer, InitAudio, InitVideo, InitJoystick, InitHaptic, InitGameController, InitEvents, InitNoParachute]
+
+instance Show InitFlag where
+    show InitTimer = "InitTimer"
+    show InitAudio = "InitAudio"
+    show InitVideo = "InitVideo"
+    show InitJoystick = "InitJoystick"
+    show InitHaptic = "InitHaptic"
+    show InitGameController = "InitGameController"
+    show InitEvents = "InitEvents"
+    show InitNoParachute = "InitNoParachute"
+    show InitEverything = "InitEverything"
+
 public
 Init : List InitFlag -> IO (Maybe String)
 Init flags = do
@@ -44,6 +58,20 @@ public
 InitSubSystem : List InitFlag -> IO (Maybe String)
 InitSubSystem flags = do
     trySDL (mkForeign (FFun "SDL_InitSubSystem" [FBits32] FInt) (sumBits flags))
+
+--for behavior when passing 0, see GetInit
+public
+WasInit : InitFlag -> IO Bool
+WasInit flag = do
+    bits <- mkForeign (FFun "SDL_WasInit" [FBits32] FBits32) (toFlag flag)
+    return (bits == (toFlag flag))
+
+--note: does not show parachute status
+public
+GetInit : IO (List InitFlag)
+GetInit = do
+    initialized <- mkForeign (FFun "SDL_WasInit" [FBits32] FBits32) 0x0
+    return $ Prelude.List.catMaybes $ map read (decomposeBitMask initialized)
 
 public
 QuitSubSystem : List InitFlag -> IO ()

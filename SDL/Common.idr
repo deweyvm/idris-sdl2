@@ -1,6 +1,7 @@
 module SDL.Common
 
 import SDL.Error
+import Data.Bits
 
 %lib C "SDL2"
 
@@ -8,9 +9,11 @@ import SDL.Error
 %include C "SDL2/SDL_rect.h"
 %include C "SDL2/SDL_video.h"
 
-total
-or32 : Bits32 -> Bits32 -> Bits32
-or32 a b = a `prim__orB32` b
+%access public
+
+instance (Show a, Show b) => Show (Either a b) where
+   show (Left l) = "Left " ++ (show l)
+   show (Right r) = "Right " ++ (show r)
 
 class Flag n a where
     toFlag : a -> n
@@ -24,6 +27,14 @@ class Enumerable a where
 
 read : (Eq a, Enumerable e, Flag a e) => a -> Maybe e
 read i = find (\x => toFlag x == i) enumerate
+
+
+decomposeBitMask : Bits32 -> List Bits32
+decomposeBitMask bits =
+    (map (prim__andB32 bits) pows) where
+    pows : List Bits32
+    pows = map (pow 2) [0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F]
+
 
 total
 fromSDLBool : Int -> Bool
@@ -44,6 +55,7 @@ getError = do
 
 --fixme - probably no one will check this -- how to solve?
 -- wraps IO actions which can fail
+--fixme rename
 trySDL : IO Int -> IO (Maybe String)
 trySDL action = do
     success <- fromSDLBool `map` action
@@ -54,7 +66,7 @@ trySDL action = do
       else do
         return Nothing
 
---fixme rename
+--fixme rename --> getOrElse and flip arguments
 trySDLRes : IO Int -> IO a -> IO (Either String a)
 trySDLRes try' getter = do
     success <- fromSDLBool `map` try'
