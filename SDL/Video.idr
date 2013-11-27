@@ -204,7 +204,7 @@ instance Flag Bits32 WindowFlag where
     toFlag WindowInputGrabbed      = 0x00000100
     toFlag WindowInputFocus        = 0x00000200
     toFlag WindowMouseFocus        = 0x00000400
-    toFlag WindowFullscreenDesktop = (toFlag WindowFullscreen) `prim__orB32` 0x00001000
+    toFlag WindowFullscreenDesktop = 0x00000001 `prim__orB32` 0x00001000
     toFlag WindowForeign           = 0x00000800
 
 instance Enumerable WindowFlag where

@@ -1,6 +1,6 @@
 #include "idris_SDL_video.h"
 
-SDL_Rect getDisplayBounds_rect;
+static SDL_Rect getDisplayBounds_rect;
 int idris_SDL_getDisplayBounds(int index) {
   return SDL_GetDisplayBounds(index, &getDisplayBounds_rect) == 0;
 }
@@ -21,7 +21,7 @@ int idris_SDL_getDisplayBounds_h() {
   return getDisplayBounds_rect.h;
 }
 
-SDL_DisplayMode sharedDisplayMode_mode;
+static SDL_DisplayMode sharedDisplayMode_mode;
 
 int idris_sharedDisplayMode(int displayIndex, int (displayGetter) (int, SDL_DisplayMode*)) {
   return displayGetter(displayIndex, &sharedDisplayMode_mode) == 0;
@@ -86,7 +86,7 @@ int idris_SDL_SetWindowDisplayMode(SDL_Window* window, Uint32 format, int w, int
 
 
 //fixme -- reference to window is lost on the C side, does this matter?
-SDL_Window* idris_sharedWindow_window;
+static SDL_Window* idris_sharedWindow_window;
 
 SDL_Window* idris_sharedWindow() {
   return idris_sharedWindow_window;
@@ -112,8 +112,8 @@ int idris_SDL_getWindowFromID(Uint32 id) {
   return idris_sharedWindow_window != NULL;
 }
 
-int idris_shared_x;
-int idris_shared_y;
+static int idris_shared_x;
+static int idris_shared_y;
 
 int idris_getShared_x() {
     return idris_shared_x;
@@ -143,7 +143,7 @@ void idris_SDL_getWindowMaximumSize(SDL_Window* window) {
     fillSharedXY(window, SDL_GetWindowMaximumSize);
 }
 
-SDL_Surface* idris_getWindowSurface_surface;
+static SDL_Surface* idris_getWindowSurface_surface;
 int idris_SDL_getWindowSurface(SDL_Window* window) {
     idris_getWindowSurface_surface = SDL_GetWindowSurface(window);
     return idris_getWindowSurface_surface != NULL;

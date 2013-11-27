@@ -59,7 +59,7 @@ InitSubSystem : List InitFlag -> IO (Maybe String)
 InitSubSystem flags = do
     trySDL (mkForeign (FFun "SDL_InitSubSystem" [FBits32] FInt) (sumBits flags))
 
---for behavior when passing 0, see GetInit
+--for the C behavior when passing 0, use GetInit
 public
 WasInit : InitFlag -> IO Bool
 WasInit flag = do

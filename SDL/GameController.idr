@@ -135,7 +135,6 @@ data GameControllerButton = ControllerButtonA
                           | ControllerButtonDpadDown
                           | ControllerButtonDpadLeft
                           | ControllerButtonDpadRight
-                          | ControllerButtonMax
 
 instance Flag Int GameControllerButton where
     toFlag ControllerButtonA             = 0
@@ -153,10 +152,9 @@ instance Flag Int GameControllerButton where
     toFlag ControllerButtonDpadDown      = 12
     toFlag ControllerButtonDpadLeft      = 13
     toFlag ControllerButtonDpadRight     = 14
-    toFlag ControllerButtonMax           = 15
 
 instance Enumerable GameControllerButton where
-    enumerate = [ControllerButtonA, ControllerButtonB, ControllerButtonX, ControllerButtonY, ControllerButtonBack, ControllerButtonGuide, ControllerButtonStart, ControllerButtonLeftStick, ControllerButtonRightStick, ControllerButtonLeftShoulder, ControllerButtonRightShoulder, ControllerButtonDpadUp, ControllerButtonDpadDown, ControllerButtonDpadLeft, ControllerButtonDpadRight, ControllerButtonMax]
+    enumerate = [ControllerButtonA, ControllerButtonB, ControllerButtonX, ControllerButtonY, ControllerButtonBack, ControllerButtonGuide, ControllerButtonStart, ControllerButtonLeftStick, ControllerButtonRightStick, ControllerButtonLeftShoulder, ControllerButtonRightShoulder, ControllerButtonDpadUp, ControllerButtonDpadDown, ControllerButtonDpadLeft, ControllerButtonDpadRight]
 
 public
 GameControllerGetButtonFromString : String -> IO (Maybe GameControllerButton)

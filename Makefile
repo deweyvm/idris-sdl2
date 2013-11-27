@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -O0
+CFLAGS=-g -O0 -w
 LIBS=-lSDL2
 SRCS = SDL/idris_SDL_video.c \
        SDL/idris_SDL_mouse.c \

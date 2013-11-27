@@ -8,6 +8,7 @@ import Data.Bits
 %include C "SDL2/SDL.h"
 
 %access public
+--%default total
 
 instance (Show a, Show b) => Show (Either a b) where
    show (Left l) = "Left " ++ (show l)
@@ -16,7 +17,6 @@ instance (Show a, Show b) => Show (Either a b) where
 class Flag n a where
     toFlag : a -> n
 
-total
 sumBits : (Flag Bits32 a) => List a -> Bits32
 sumBits flags = foldl prim__orB32 0x0 (map toFlag flags)
 
@@ -25,7 +25,6 @@ class Enumerable a where
 
 read : (Eq a, Enumerable e, Flag a e) => a -> Maybe e
 read i = find (\x => toFlag x == i) enumerate
-
 
 decomposeBitMask : Bits32 -> List Bits32
 decomposeBitMask bits =
@@ -37,12 +36,10 @@ bitMaskToFlags : (Enumerable a, Flag Bits32 a) => Bits32 -> List a
 bitMaskToFlags mask' =
     Prelude.List.catMaybes $ map read (decomposeBitMask mask')
 
-total
 fromSDLBool : Int -> Bool
 fromSDLBool 0 = False
 fromSDLBool _ = True
 
-total
 toSDLBool : Bool -> Int
 toSDLBool True = 1
 toSDLBool False = 0

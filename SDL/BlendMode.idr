@@ -12,3 +12,7 @@ instance Flag Bits32 BlendMode where
     toFlag BlendModeBlend = 0x1
     toFlag BlendModeAdd   = 0x2
     toFlag BlendModeMod   = 0x4
+
+
+instance Enumerable BlendMode where
+    enumerate = [BlendModeNone, BlendModeBlend, BlendModeAdd, BlendModeMod]

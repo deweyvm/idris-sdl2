@@ -46,4 +46,5 @@ void idris_SDL_getWindowMaximumSize(SDL_Window* window);
 
 int idris_SDL_getWindowSurface(SDL_Window* window);
 SDL_Surface* idris_SDL_getWindwoSurface_surface();
+
 #endif /*IDRIS_SDL_VIDEO_H*/
