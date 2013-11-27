@@ -30,6 +30,7 @@ doWindow = do
             SetRenderDrawColor rend red
             RenderDrawLine rend 0 0 100 100
             RenderPresent rend
+
 main : IO ()
 main = do
     --drivers <- GetNumVideoDrivers
