@@ -6,15 +6,15 @@ data Rect = mkRect Int Int Int Int
 data Point = mkPoint Int Int
 
 instance Show Rect where
-    show (mkRect x y w h) = join[ "Rect "
-                                , show x
-                                , " "
-                                , show y
-                                , " "
-                                , show w
-                                , " "
-                                , show h
-                                ]
+    show (mkRect x y w h) = join [ "Rect "
+                                 , show x
+                                 , " "
+                                 , show y
+                                 , " "
+                                 , show w
+                                 , " "
+                                 , show h
+                                 ]
 
 
 RectEmpty : Rect -> Bool
