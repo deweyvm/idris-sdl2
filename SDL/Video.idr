@@ -3,6 +3,7 @@ module SDL.Video
 import SDL.Common
 import SDL.SDL
 import SDL.Rect
+import SDL.Surface
 import Data.Bits
 
 %include C "SDL2/SDL_video.h"
@@ -206,6 +207,9 @@ instance Flag Bits32 WindowFlag where
     toFlag WindowFullscreenDesktop = (toFlag WindowFullscreen) `prim__orB32` 0x00001000
     toFlag WindowForeign           = 0x00000800
 
+instance Enumerable WindowFlag where
+    enumerate = [WindowFullscreen, WindowOpengl, WindowShown, WindowHidden, WindowBorderless, WindowResizable, WindowMinimized, WindowMaximized, WindowInputGrabbed, WindowInputFocus, WindowMouseFocus, WindowForeign]
+
 --we check if the window was created successfully
 checkCreateWindow :  String -> Int -> Int -> Int -> Int -> List WindowFlag -> IO Int
 checkCreateWindow title x y w h flags =
@@ -244,9 +248,9 @@ GetWindowFromID id = do
 --this function might be pure
 --fixme return List WindowFlag somehow
 public
-GetWindowFlags : Window -> IO Bits32
+GetWindowFlags : Window -> IO (List WindowFlag)
 GetWindowFlags (mkWindow ptr) =
-    mkForeign (FFun "SDL_GetWindowFlags" [FPtr] FBits32) ptr
+    [| bitMaskToFlags (mkForeign (FFun "SDL_GetWindowFlags" [FPtr] FBits32) ptr) |]
 
 public
 SetWindowTitle : Window -> String -> IO ()
@@ -293,7 +297,7 @@ public
 GetWindowPosition : Window -> IO (Int, Int)
 GetWindowPosition (mkWindow ptr) = do
     mkForeign (FFun "idris_SDL_getWindowPosition" [FPtr] FUnit) ptr
-    [| (<*->) getSharedX getSharedY |]
+    [| (/*/) getSharedX getSharedY |]
 
 public
 SetWindowSize : Window -> Int -> Int -> IO ()
@@ -304,7 +308,7 @@ public
 GetWindowSize : Window -> IO (Int, Int)
 GetWindowSize (mkWindow ptr) = do
     mkForeign (FFun "idris_SDL_getWindowSize" [FPtr] FUnit) ptr
-    [| (<*->) getSharedX getSharedY |]
+    [| (/*/) getSharedX getSharedY |]
 
 public
 SetWindowMinimumSize : Window -> Int -> Int -> IO ()
@@ -315,7 +319,7 @@ public
 GetWindowMinimumSize : Window -> IO (Int, Int)
 GetWindowMinimumSize (mkWindow ptr) = do
     mkForeign (FFun "idris_SDL_getWindowMinimumSize" [FPtr] FUnit) ptr
-    [| (<*->) getSharedX getSharedY |]
+    [| (/*/) getSharedX getSharedY |]
 
 public
 SetWindowMaximumSize : Window -> Int -> Int -> IO ()
@@ -326,7 +330,7 @@ public
 GetWindowMaximumSize : Window -> IO (Int, Int)
 GetWindowMaximumSize (mkWindow ptr) = do
     mkForeign (FFun "idris_SDL_getWindowMaximumSize" [FPtr] FUnit) ptr
-    [| (<*->) getSharedX getSharedY |]
+    [| (/*/) getSharedX getSharedY |]
 
 public
 SetWindowBordered : Window -> Bool -> IO ()
@@ -390,7 +394,6 @@ GetWindowGrab : Window -> IO Bool
 GetWindowGrab (mkWindow ptr) = do
     [| fromSDLBool (mkForeign (FFun "SDL_GetWindowGrab" [FPtr] FInt) ptr) |]
 
---fixme
 public
 SetWindowBrightness : Window -> Float -> IO (Maybe String)
 SetWindowBrightness (mkWindow ptr) brightness = do

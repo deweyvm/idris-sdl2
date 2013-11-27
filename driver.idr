@@ -12,14 +12,24 @@ import SDL.BlendMode
 import SDL.CPUInfo
 import SDL.Bits
 import SDL.GameController
-
-
+import SDL.Render
 
 doInit : IO ()
 doInit = do
     init <- Init [InitEverything]
     putStrLn $ show init
 
+doWindow : IO ()
+doWindow = do
+    x <- CreateWindow "test" 600 600 600 600 [WindowShown]
+    case x of
+        Left err => return ()
+        Right win => do
+            rend <- CreateRenderer win 0 [RendererAccelerated]
+            RenderClear rend
+            SetRenderDrawColor rend red
+            RenderDrawLine rend 0 0 100 100
+            RenderPresent rend
 main : IO ()
 main = do
     --drivers <- GetNumVideoDrivers
@@ -27,7 +37,7 @@ main = do
     doInit
     i <- GetInit
     putStrLn $ show i
-    CreateWindow "test" 600 600 600 600 [WindowShown]
+    doWindow
     SetClipboardText "clipboard2"
     clip <- GetClipboardText
     putStrLn $ "Clipboard: " ++ (show clip)

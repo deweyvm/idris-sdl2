@@ -71,7 +71,7 @@ public
 GetInit : IO (List InitFlag)
 GetInit = do
     initialized <- mkForeign (FFun "SDL_WasInit" [FBits32] FBits32) 0x0
-    return $ Prelude.List.catMaybes $ map read (decomposeBitMask initialized)
+    return $ bitMaskToFlags initialized
 
 public
 QuitSubSystem : List InitFlag -> IO ()

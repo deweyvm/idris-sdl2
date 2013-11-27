@@ -27,9 +27,11 @@ instance Flag Bits32 SurfaceFlag where
 --     Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask);
 
 --public
---CreateRGBSurface : SurfaceFlags -> Int -> Int -> Int -> Bits32 -> Bits32 -> Bits32 -> Bits32
---CreateRGBSurface
+--CreateRGBSurface : List SurfaceFlag -> Int -> Int -> Int -> Bits32 -> Bits32 -> Bits32 -> Bits32 -> IO Surface
+--CreateRGBSurface flags w h depth r g b a
+
 public
 BlitSurface : Surface -> Rect -> Surface -> Rect -> IO ()
 BlitSurface (mkSurface src) (mkRect sx sy sw sh) (mkSurface dst) (mkRect dx dy dw dh) =
     mkForeign (FFun "SDL_BlitSurface" [FPtr, FInt, FInt, FInt, FInt, FPtr, FInt, FInt, FInt, FInt] FUnit) src sx sy sw sh dst dx dy dw dh
+
