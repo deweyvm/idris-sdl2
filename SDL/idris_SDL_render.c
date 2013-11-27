@@ -81,12 +81,12 @@ Uint8 idris_getBlue_uint8(){
 }
 
 int idris_SDL_getTextureColorMod(SDL_Texture* texture) {
-    return 0 != SDL_GetTextureColorMod(texture, &r, &g, &b);
+    return 0 == SDL_GetTextureColorMod(texture, &r, &g, &b);
 }
 
 static Uint8 a;
 int idris_SDL_getTextureAlphaMod(SDL_Texture* texture) {
-    return 0 != SDL_GetAlphaMod(texture, &a);
+    return 0 == SDL_GetAlphaMod(texture, &a);
 }
 
 SDL_BlendMode blendMode;

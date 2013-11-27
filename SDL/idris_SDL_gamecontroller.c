@@ -1,6 +1,6 @@
 #include "idris_SDL_gamecontroller.h"
 
-char* sharedString_string;
+static char* sharedString_string;
 
 const char* idris_gameController_sharedString_string() {
     return sharedString_string;
@@ -8,7 +8,7 @@ const char* idris_gameController_sharedString_string() {
 
 void idris_gameController_sharedString_free() {
     SDL_free(sharedString_string);
-    sharedString_string = 0;
+    sharedString_string = NULL;
 }
 
 int idris_SDL_gameControllerMappingForGUID(Uint8* guid) {
@@ -27,7 +27,7 @@ int idris_SDL_gameControllerNameForIndex(int joystick_index) {
     return sharedString_string != NULL;
 }
 
-SDL_GameController* idris_sharedGameController;
+static SDL_GameController* idris_sharedGameController;
 int idris_SDL_gameControllerOpen(int joystick_index) {
     idris_sharedGameController = SDL_GameControllerOpen(joystick_index);
     return idris_sharedGameController != NULL;

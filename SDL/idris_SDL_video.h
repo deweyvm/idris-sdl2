@@ -23,11 +23,11 @@ int idris_SDL_getDesktopDisplayMode(int displayIndex);
 int idris_SDL_getCurrentDisplayMode(int displayIndex);
 int idris_SDL_getClosestDisplayMode(int displayIndex, Uint32 format, int w, int h, int refresh_rate, void* driverdata);
 
-int idris_SDL_SetWindowDisplayMode(SDL_Window* window, Uint32 format, int w, int h, int refresh_rate, void* driverdata);
+int idris_SDL_setWindowDisplayMode(SDL_Window* window, Uint32 format, int w, int h, int refresh_rate, void* driverdata);
 
 SDL_Window* idris_sharedWindow();
 
-int idris_SDL_CreateWindow(const char* title, int x, int y, int w, int h, Uint32 flags);
+int idris_SDL_createWindow(const char* title, int x, int y, int w, int h, Uint32 flags);
 
 int idris_SDL_getWindowDisplayMode(SDL_Window* window);
 
@@ -45,6 +45,6 @@ void idris_SDL_getWindowMinimumSize(SDL_Window* window);
 void idris_SDL_getWindowMaximumSize(SDL_Window* window);
 
 int idris_SDL_getWindowSurface(SDL_Window* window);
-SDL_Surface* idris_SDL_getWindwoSurface_surface();
+SDL_Surface* idris_SDL_getWindowSurface_surface();
 
 #endif /*IDRIS_SDL_VIDEO_H*/

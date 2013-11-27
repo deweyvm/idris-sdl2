@@ -34,4 +34,5 @@ SDL_BlendMode idris_getBlendMode_mode();
 int idris_SDL_getTextureBlendMode(SDL_Texture* texture);
 
 int idris_SDL_updateTexture(SDL_Texture* texture, int x, int y, int w, int h, const void *pixels, int pitch);
+
 #endif /* IDRIS_SDL_RENDER_H */

@@ -213,7 +213,7 @@ instance Enumerable WindowFlag where
 --we check if the window was created successfully
 checkCreateWindow :  String -> Int -> Int -> Int -> Int -> List WindowFlag -> IO Int
 checkCreateWindow title x y w h flags =
-    (mkForeign (FFun "idris_SDL_CreateWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h (sumBits flags))
+    (mkForeign (FFun "idris_SDL_createWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h (sumBits flags))
 
 getCreateWindow : IO Window
 getCreateWindow = [| mkWindow (mkForeign (FFun "idris_sharedWindow" [] FPtr)) |]

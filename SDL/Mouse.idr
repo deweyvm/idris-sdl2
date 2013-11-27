@@ -46,38 +46,33 @@ data MouseState = mkMouseState Int Int Bits32
 --fixme -- return maybe for null ptr
 public
 GetMouseFocus : IO Window
-GetMouseFocus = [| mkWindow (mkForeign (FFun "SDL_GetMouseFocus" [] FPtr)) |]
+GetMouseFocus =
+    [| mkWindow (mkForeign (FFun "SDL_GetMouseFocus" [] FPtr)) |]
 
-getMouseState_x : IO Int
-getMouseState_x = mkForeign (FFun "idris_SDL_GetMouseState_x" [] FInt)
 
-getMouseState_y : IO Int
-getMouseState_y = mkForeign (FFun "idris_SDL_GetMouseState_y" [] FInt)
+getSharedX : IO Int
+getSharedX = mkForeign (FFun "idris_sharedX_int" [] FInt)
+
+getSharedY : IO Int
+getSharedY = mkForeign (FFun "idris_sharedY_int" [] FInt)
 
 getMouseState_state : IO Bits32
-getMouseState_state = mkForeign (FFun "idris_SDL_GetMouseState_state" [] FBits32)
+getMouseState_state = mkForeign (FFun "idris_SDL_getMouseState_state" [] FBits32)
 
 public
 GetMouseState : IO MouseState
-GetMouseState = [| mkMouseState getMouseState_x
-                                getMouseState_y
+GetMouseState = [| mkMouseState getSharedX
+                                getSharedY
                                 getMouseState_state |]
 
-
-getRelativeMouseState_x : IO Int
-getRelativeMouseState_x = mkForeign (FFun "idris_SDL_GetRelativeMouseState_x" [] FInt)
-
-getRelativeMouseState_y : IO Int
-getRelativeMouseState_y = mkForeign (FFun "idris_SDL_GetRelativeMouseState_y" [] FInt)
-
 getRelativeMouseState_state : IO Bits32
-getRelativeMouseState_state = mkForeign (FFun "idris_SDL_GetRelativeMouseState_state" [] FBits32)
+getRelativeMouseState_state = mkForeign (FFun "idris_SDL_getRelativeMouseState_state" [] FBits32)
 
 public
 GetRelativeMouseState : IO MouseState
 GetRelativeMouseState = do
-    [| mkMouseState getRelativeMouseState_x
-                    getRelativeMouseState_y
+    [| mkMouseState getSharedX
+                    getSharedY
                     getRelativeMouseState_state |]
 
 public
@@ -85,46 +80,60 @@ WarpMouseInWindow : Window -> Int -> Int -> IO ()
 WarpMouseInWindow (mkWindow ptr) x y =
     mkForeign (FFun "SDL_WarpMouseInWindow" [FPtr, FInt, FInt] FUnit) ptr x y
 
---fixme - maybe return an error string here if it fails?
---        need to check sdl's behavior
 public
-SetRelativeMouseMode : Bool -> IO Bool
-SetRelativeMouseMode b = [| fromSDLBool (mkForeign (FFun "SDL_SetRelativeMouseMode" [FInt] FInt) (toSDLBool b)) |]
+SetRelativeMouseMode : Bool -> IO (Maybe String)
+SetRelativeMouseMode b =
+    trySDL (mkForeign (FFun "SDL_SetRelativeMouseMode" [FInt] FInt) (toSDLBool b))
 
 public
 GetRelativeMouseMode : IO Bool
-GetRelativeMouseMode = [| fromSDLBool (mkForeign (FFun "SDL_GetRelativeMouseMode" [] FInt)) |]
+GetRelativeMouseMode =
+    [| fromSDLBool (mkForeign (FFun "SDL_GetRelativeMouseMode" [] FInt)) |]
+
+getCursor : IO Cursor
+getCursor =
+    [| mkCursor (mkForeign (FFun "idris_sharedCursor" [] FPtr)) |]
 
 public
-CreateCursor : Ptr -> Ptr -> Int -> Int -> Int -> Int -> IO Cursor
+CreateCursor : Ptr -> Ptr -> Int -> Int -> Int -> Int -> IO (Either String Cursor)
 CreateCursor data' mask w h hot_x hot_y =
-    [| mkCursor (mkForeign (FFun "SDL_CreateCursor" [FPtr, FPtr, FInt, FInt, FInt, FInt] FPtr) data' mask w h hot_x hot_y) |]
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_createCursor" [FPtr, FPtr, FInt, FInt, FInt, FInt] FInt) data' mask w h hot_x hot_y)
+        getCursor
 
 public
-CreateColorCursor : Surface -> Int -> Int -> IO Cursor
+CreateColorCursor : Surface -> Int -> Int -> IO (Either String Cursor)
 CreateColorCursor (mkSurface ptr) hot_x hot_y =
-    [| mkCursor (mkForeign (FFun "SDL_CreateColorCursor" [FPtr, FInt, FInt] FPtr) ptr hot_x hot_y) |]
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_createColorCursor" [FPtr, FInt, FInt] FInt) ptr hot_x hot_y)
+        getCursor
 
 public
-CreateSystemCursor : SystemCursor -> IO Cursor
+CreateSystemCursor : SystemCursor -> IO (Either String Cursor)
 CreateSystemCursor flag =
-    [| mkCursor (mkForeign (FFun "SDL_CreateSystemCursor" [FBits32] FPtr) (toFlag flag)) |]
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_createSystemCursor" [FBits32] FInt) (toFlag flag))
+        getCursor
 
-
+--fixme, will this set GetError on failure?
 public
 SetCursor : Cursor -> IO ()
 SetCursor (mkCursor ptr) =
     mkForeign (FFun "SDL_SetCursor" [FPtr] FUnit) ptr
 
---fixme, may return NULL
 public
-GetCursor : IO Cursor {- Either String Cursor-}
-GetCursor = [| mkCursor (mkForeign (FFun "SDL_GetCursor" [] FPtr)) |]
+GetCursor : IO (Either String Cursor)
+GetCursor =
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_getCursor" [] FInt))
+        getCursor
 
---fixme, may return NULL
 public
-GetDefaultCursor : IO Cursor {- Either String Cursor-}
-GetDefaultCursor = [| mkCursor (mkForeign (FFun "SDL_GetDefaultCursor" [] FPtr)) |]
+GetDefaultCursor : IO (Either String Cursor)
+GetDefaultCursor =
+    trySDLRes
+        (mkForeign (FFun "SDL_GetDefaultCursor" [] FInt))
+        getCursor
 
 public
 FreeCursor : Cursor -> IO ()
@@ -133,7 +142,8 @@ FreeCursor (mkCursor ptr) =
 
 public
 IsCursorVisible : IO Bool
-IsCursorVisible = [| fromSDLBool (mkForeign (FFun "SDL_ShowCursor" [FInt] FInt) (-1)) |]
+IsCursorVisible =
+    [| fromSDLBool (mkForeign (FFun "SDL_ShowCursor" [FInt] FInt) (-1)) |]
 
 public
 ShowCursor : IO ()
