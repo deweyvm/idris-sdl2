@@ -26,6 +26,35 @@ int idris_SDL_getRenderer(SDL_Window* window) {
     return renderer != NULL;
 }
 
+static SDL_RendererInfo rendererInfo;
+int idris_SDL_getRendererInfo(SDL_Renderer* renderer) {
+    return 0 == SDL_GetRendererInfo(renderer, &rendererInfo);
+}
+
+char* idris_rendererInfo_name() {
+    return rendererInfo.name;
+}
+
+Uint32 idris_rendererInfo_flags() {
+    return rendererInfo.flags;
+}
+
+int idris_rendererInfo_hasTextureFormat() {
+    return rendererInfo.num_texture_formats > 0;
+}
+
+Uint32 idris_rendererInfo_getTextureFormat() {
+    return rendererInfo.texture_formats[rendererInfo.num_texture_formats---1];
+}
+
+int idris_rendererInfo_max_texture_width() {
+    return rendererInfo.max_texture_width;
+}
+
+int idris_rendererInfo_max_texture_height() {
+    return rendererInfo.max_texture_height;
+}
+
 static int width;
 static int height;
 
@@ -86,7 +115,7 @@ int idris_SDL_getTextureColorMod(SDL_Texture* texture) {
 
 static Uint8 a;
 int idris_SDL_getTextureAlphaMod(SDL_Texture* texture) {
-    return 0 == SDL_GetAlphaMod(texture, &a);
+    return 0 == SDL_GetTextureAlphaMod(texture, &a);
 }
 
 SDL_BlendMode blendMode;
@@ -101,4 +130,75 @@ int idris_SDL_getTextureBlendMode(SDL_Texture* texture) {
 int idris_SDL_updateTexture(SDL_Texture* texture, int x, int y, int w, int h, const void *pixels, int pitch) {
     SDL_Rect rect = {x, y, w, h};
     return 0 == SDL_UpdateTexture(texture, &rect, pixels, pitch);
+}
+
+static void* pixels;
+static int pitch;
+//extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_Texture * texture, const SDL_Rect * rect, void **pixels, int *pitch);
+int idris_SDL_lockTexture(SDL_Texture * texture, int x, int y, int w, int h) {
+    SDL_Rect rect = {x, y, w, h};
+    return 0 == SDL_LockTexture(texture, &rect, &pixels, &pitch);
+}
+
+void* idris_getPixels() {
+    return pixels;
+}
+
+int idris_getPitch() {
+    return pitch;
+}
+
+static SDL_Texture* texture;
+int idris_SDL_getRenderTarget(SDL_Renderer* renderer) {
+    texture = SDL_GetRenderTarget(renderer);
+    return texture != NULL;
+}
+SDL_Texture* idris_sharedTexture() {
+    return texture;
+}
+
+void idris_SDL_renderGetLogicalSize(SDL_Renderer* renderer) {
+    SDL_RenderGetLogicalSize(renderer, &width, &height);
+}
+
+int idris_SDL_renderSetViewport(SDL_Renderer* renderer, int x, int y, int w, int h) {
+    SDL_Rect rect = {x, y, w, h};
+    return 0 == SDL_RenderSetViewport(renderer, &rect);
+}
+
+static int x;
+static int y;
+int idris_render_sharedX_int() {
+    return x;
+}
+
+int idris_render_sharedY_int() {
+    return y;
+}
+
+void idris_SDL_renderGetViewport(SDL_Renderer* renderer) {
+    SDL_Rect rect;
+    SDL_RenderGetViewport(renderer, &rect);
+    x = rect.x;
+    y = rect.y;
+    width = rect.w;
+    height = rect.h;
+}
+
+int idris_SDL_renderSetClipRect(SDL_Renderer* renderer, int x, int y, int w, int h) {
+    SDL_Rect rect = {x, y, w, h};
+    return 0 == SDL_RenderSetClipRect(renderer, &rect);
+}
+
+void idris_SDL_renderGetClipRect(SDL_Renderer* renderer) {
+    SDL_Rect rect;
+    SDL_RenderGetClipRect(renderer, &rect);
+    x = rect.x;
+    y = rect.y;
+    width = rect.w;
+    height = rect.h;
+}
+
+void idris_SDL_renderGetScale(SDL_Renderer* renderer) {
+    SDL_RenderGetScale(renderer, &x, &y);
 }

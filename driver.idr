@@ -19,13 +19,33 @@ doInit = do
     init <- Init [InitEverything]
     putStrLn $ show init
 
+testRenderer : Renderer -> IO ()
+testRenderer renderer = do
+    info <- GetRenderDriverInfo renderer
+    case info of
+        Right (mkRendererInfo name flags formats maxwidth maxheight) =>
+            putStrLn $ join [ name
+                            , " "
+                            , show flags
+                            , " "
+                            , show formats
+                            , " "
+                            , show maxwidth
+                            , " "
+                            , show maxheight
+                            ]
+        Left err => putStrLn ("ERROR " ++ err)
+
 doWindow : IO ()
 doWindow = do
     x <- CreateWindow "test" 600 600 600 600 [WindowShown]
     case x of
-        Left err => return ()
+        Left err =>
+            putStr "no window"
         Right win => do
+            putStrLn "what"
             rend <- CreateRenderer win 0 [RendererAccelerated]
+            testRenderer rend
             RenderClear rend
             SetRenderDrawColor rend red
             RenderDrawLine rend 0 0 100 100
