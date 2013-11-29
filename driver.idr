@@ -13,7 +13,6 @@ import SDL.CPUInfo
 import SDL.Bits
 import SDL.GameController
 import SDL.Render
-import SDL.Array
 
 doInit : IO ()
 doInit = do

@@ -445,15 +445,22 @@ RenderReadPixels (mkRenderer ren) (mkRect x y w h) format pitch =
         (mkForeign (FFun "idris_SDL_renderReadPixels" [FPtr, FInt, FInt, FInt, FInt, FBits32, FInt] FInt) ren x y w h format pitch)
         [| mkPixels (mkForeign (FFun "idris_getSharedPixels" [] FPtr)) |]
 
+public
+RenderPresent : Renderer -> IO ()
+RenderPresent (mkRenderer ren) =
+    mkForeign (FFun "SDL_RenderPresent" [FPtr] FUnit) ren
 
+public
+DestroyTexture : Texture -> IO ()
+DestroyTexture (mkTexture txt) =
+    mkForeign (FFun "SDL_DestroyTexture" [FPtr] FUnit) txt
+
+public
+DestroyRenderer : Renderer -> IO ()
+DestroyRenderer (mkRenderer ren) =
+    mkForeign (FFun "SDL_DestroyRenderer" [FPtr] FUnit) ren
 
 public
 SetRenderDrawColor : Renderer -> Color -> IO (Maybe String)
 SetRenderDrawColor (mkRenderer ren) (mkColor r g b a) =
     trySDL (mkForeign (FFun "SDL_SetRenderDrawColor" [FPtr, FBits8, FBits8, FBits8, FBits8] FInt) ren r g b a)
-
-
-public
-RenderPresent : Renderer -> IO ()
-RenderPresent (mkRenderer ren) =
-    mkForeign (FFun "SDL_RenderPresent" [FPtr] FUnit) ren
