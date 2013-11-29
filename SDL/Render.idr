@@ -339,8 +339,8 @@ RenderGetScale (mkRenderer ren) =
         [| (/*/) getX getY |]
 
 public
-RenderDrawColor : Renderer -> Color -> IO (Maybe String)
-RenderDrawColor (mkRenderer ren) (mkColor r g b a) =
+SetRenderDrawColor : Renderer -> Color -> IO (Maybe String)
+SetRenderDrawColor (mkRenderer ren) (mkColor r g b a) =
    trySDL (mkForeign (FFun "SDL_SetRenderDrawColor" [FPtr, FBits8, FBits8, FBits8, FBits8] FInt) ren r g b a)
 
 public
@@ -459,8 +459,3 @@ public
 DestroyRenderer : Renderer -> IO ()
 DestroyRenderer (mkRenderer ren) =
     mkForeign (FFun "SDL_DestroyRenderer" [FPtr] FUnit) ren
-
-public
-SetRenderDrawColor : Renderer -> Color -> IO (Maybe String)
-SetRenderDrawColor (mkRenderer ren) (mkColor r g b a) =
-    trySDL (mkForeign (FFun "SDL_SetRenderDrawColor" [FPtr, FBits8, FBits8, FBits8, FBits8] FInt) ren r g b a)
