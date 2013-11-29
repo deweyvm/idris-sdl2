@@ -118,7 +118,7 @@ int idris_SDL_getTextureAlphaMod(SDL_Texture* texture) {
     return 0 == SDL_GetTextureAlphaMod(texture, &a);
 }
 
-SDL_BlendMode blendMode;
+static SDL_BlendMode blendMode;
 SDL_BlendMode idris_getBlendMode_mode() {
     return blendMode;
 }
@@ -201,4 +201,52 @@ void idris_SDL_renderGetClipRect(SDL_Renderer* renderer) {
 
 void idris_SDL_renderGetScale(SDL_Renderer* renderer) {
     SDL_RenderGetScale(renderer, &x, &y);
+}
+
+int idris_SDL_getRenderDrawBlendMode(SDL_Renderer* renderer) {
+    return 0 == SDL_GetRenderDrawBlendMode(renderer, &blendMode);
+}
+
+int idris_SDL_renderDrawRect(SDL_Renderer* renderer, int x, int y, int w, int h) {
+    SDL_Rect rect = {x, y, w, h};
+    return 0 == SDL_RenderDrawRect(renderer, &rect);
+}
+
+int idris_SDL_renderFillRect(SDL_Renderer* renderer, int x, int y, int w, int h) {
+    SDL_Rect rect = {x, y, w, h};
+    return 0 == SDL_RenderFillRect(renderer, &rect);
+}
+
+int idris_SDL_renderCopy(SDL_Renderer* renderer, SDL_Texture* texture,
+                         int sx, int sy, int sw, int sh,
+                         int dx, int dy, int dw, int dh) {
+    SDL_Rect src = {sx, sy, sw, sh};
+    SDL_Rect dst = {dx, dy, dw, dh};
+    return 0 == SDL_RenderCopy(renderer, texture, &src, &dst);
+}
+
+int idris_SDL_renderCopyEx(SDL_Renderer* renderer, SDL_Texture* texture,
+                           int sx, int sy, int sw, int sh,
+                           int dx, int dy, int dw, int dh,
+                           float angle, int cx, int cy, SDL_RendererFlip flip) {
+    SDL_Rect src = {sx, sy, sw, sh};
+    SDL_Rect dst = {dx, dy, dw, dh};
+    SDL_Point center = {x, y};
+    return 0 == SDL_RenderCopyEx(renderer, texture, &src, &dst, angle, &center, flip);
+}
+
+static void* pixels;
+int idris_SDL_renderReadPixels(SDL_Renderer* renderer,
+                               int x, int y, int w, int h,
+                               Uint32 format, int pitch) {
+    SDL_Rect rect = {x, y, w, h};
+    int retval = SDL_RenderReadPixels(renderer, &rect, pixels, format, pitch);
+    if (pixels == NULL) {
+        return 0; //just in case. this is probably stupid.
+    }
+    return 0 == retval;
+}
+
+void* idris_getSharedPixels() {
+    return pixels;
 }

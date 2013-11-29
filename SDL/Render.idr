@@ -164,9 +164,9 @@ getFormat = mkForeign (FFun "idris_getSharedAccess_int" [] FBits32)
 
 public
 QueryTexture : Texture -> IO (Either String TextureInfo)
-QueryTexture (mkTexture ptr) =
+QueryTexture (mkTexture txt) =
     trySDLRes
-        (mkForeign (FFun "idris_SDL_queryTexture" [FPtr] FInt) ptr)
+        (mkForeign (FFun "idris_SDL_queryTexture" [FPtr] FInt) txt)
         [| mkTextureInfo getFormat
                          (read `map` getTextureAccess)
                          getWidth
@@ -175,8 +175,8 @@ QueryTexture (mkTexture ptr) =
 -- | alpha is ignored
 public
 SetTextureColorMod : Texture -> Color -> IO (Maybe String)
-SetTextureColorMod (mkTexture ptr) (mkColor r g b _) =
-    trySDL (mkForeign (FFun "SetTextureColorMod" [FPtr, FBits8, FBits8, FBits8] FInt) ptr r g b)
+SetTextureColorMod (mkTexture txt) (mkColor r g b _) =
+    trySDL (mkForeign (FFun "SetTextureColorMod" [FPtr, FBits8, FBits8, FBits8] FInt) txt r g b)
 
 --int SDLCALL SDL_GetTextureColorMod(SDL_Texture * texture, Uint8 * r, Uint8 * g, Uint8 * b);
 
@@ -192,9 +192,9 @@ getBlue = mkForeign (FFun "idris_getBlue_uint8" [] FBits8)
 -- | alpha will be set to 1 always. to get alpha use GetTextureAlphaMod
 public
 GetTextureColorMod : Texture -> IO (Either String Color)
-GetTextureColorMod (mkTexture ptr) =
+GetTextureColorMod (mkTexture txt) =
     trySDLRes
-        (mkForeign (FFun "idris_SDL_getTextureColorMod" [FPtr] FInt) ptr)
+        (mkForeign (FFun "idris_SDL_getTextureColorMod" [FPtr] FInt) txt)
         [| mkColor getRed
                    getGreen
                    getBlue
@@ -202,32 +202,35 @@ GetTextureColorMod (mkTexture ptr) =
 
 public
 SetTextureAlphaMod : Texture -> Bits8 -> IO (Maybe String)
-SetTextureAlphaMod (mkTexture ptr) a =
-    trySDL (mkForeign (FFun "SDL_SetTextureAlphaMod" [FPtr, FBits8] FInt) ptr a)
+SetTextureAlphaMod (mkTexture txt) a =
+    trySDL (mkForeign (FFun "SDL_SetTextureAlphaMod" [FPtr, FBits8] FInt) txt a)
 
 getAlpha : IO Bits8
 getAlpha = mkForeign (FFun "idris_getAlpha_uint8" [] FBits8)
 
 public
 GetTextureAlphaMod : Texture -> IO (Either String Bits8)
-GetTextureAlphaMod (mkTexture ptr) =
+GetTextureAlphaMod (mkTexture txt) =
     trySDLRes
-        (mkForeign (FFun "idris_SDL_getTextureAlphaMod" [FPtr] FInt) ptr)
+        (mkForeign (FFun "idris_SDL_getTextureAlphaMod" [FPtr] FInt) txt)
         getAlpha
 
 public
 SetTextureBlendMode : Texture -> BlendMode -> IO (Maybe String)
-SetTextureBlendMode (mkTexture ptr) mode =
-    trySDL (mkForeign (FFun "SDL_SetTextureBlendMode" [FPtr, FBits32] FInt) ptr (toFlag mode))
+SetTextureBlendMode (mkTexture txt) mode =
+    trySDL (mkForeign (FFun "SDL_SetTextureBlendMode" [FPtr, FBits32] FInt) txt (toFlag mode))
+
+--fixme, display flag and type of flag
+--probably also a bad API, just return a maybe and let the user handle it?
+extractFlag : (Bits32 -> Maybe a) -> Either String Bits32 -> Either String a
+extractFlag f e = e >>= ((maybeToEither ("Unable to read flag")) . f)
 
 public
 GetTextureBlendMode : Texture -> IO (Either String BlendMode)
-GetTextureBlendMode (mkTexture ptr) =
-    extract `map` (trySDLRes
-        (mkForeign (FFun "idris_SDL_getTextureBlendMode" [FPtr] FInt) ptr)
-        (mkForeign (FFun "idris_getBlendMode_mode" [] FBits32))) where
-            extract : Either String Bits32 -> Either String BlendMode
-            extract e = e >>= ((maybeToEither "Unknown BlendMode") . read)
+GetTextureBlendMode (mkTexture txt) =
+    (extractFlag read) `map` (trySDLRes
+        (mkForeign (FFun "idris_SDL_getTextureBlendMode" [FPtr] FInt) txt)
+        (mkForeign (FFun "idris_getBlendMode_mode" [] FBits32)))
 
 public
 UpdateTexture : Texture -> Rect -> Pixels -> Int -> IO (Maybe String)
@@ -336,9 +339,113 @@ RenderGetScale (mkRenderer ren) =
         [| (/*/) getX getY |]
 
 public
-RenderDrawLine : Renderer -> Int -> Int -> Int -> Int -> IO (Maybe String)
-RenderDrawLine (mkRenderer ren) x1 y1 x2 y2 =
+RenderDrawColor : Renderer -> Color -> IO (Maybe String)
+RenderDrawColor (mkRenderer ren) (mkColor r g b a) =
+   trySDL (mkForeign (FFun "SDL_SetRenderDrawColor" [FPtr, FBits8, FBits8, FBits8, FBits8] FInt) ren r g b a)
+
+public
+GetRenderDrawColor : Renderer -> IO (Either String Color)
+GetRenderDrawColor (mkRenderer ren) =
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_getRenderDrawColor" [FPtr] FInt) ren)
+        [| mkColor getRed
+                   getGreen
+                   getBlue
+                   getAlpha |]
+
+public
+SetRenderDrawBlendMode : Renderer -> BlendMode -> IO (Maybe String)
+SetRenderDrawBlendMode (mkRenderer ren) mode =
+    trySDL (mkForeign (FFun "SDL_SetRenderDrawBlendMode" [FPtr, FBits32] FInt) ren (toFlag mode))
+
+public
+GetRenderDrawBlendMode : Renderer -> IO (Either String BlendMode)
+GetRenderDrawBlendMode (mkRenderer ren) =
+    (extractFlag read) `map` trySDLRes
+        (mkForeign (FFun "idris_SDL_getRenderDrawBlendMode" [FPtr] FInt) ren)
+        (mkForeign (FFun "idris_getBlendMode_mode" [] FBits32))
+
+--extern DECLSPEC int SDLCALL SDL_RenderClear(SDL_Renderer * renderer);
+public
+RenderClear : Renderer -> IO (Maybe String)
+RenderClear (mkRenderer ren) =
+    trySDL (mkForeign (FFun "SDL_RenderClear" [FPtr] FInt) ren)
+
+public
+RenderDrawPoint : Renderer -> Point -> IO (Maybe String)
+RenderDrawPoint (mkRenderer ren) (mkPoint x y) =
+    trySDL (mkForeign (FFun "SDL_RenderDrawPoint" [FPtr, FInt, FInt] FInt) ren x y)
+
+--fixme, use the array version and return an error properly
+public total
+RenderDrawPoints : Renderer -> List Point -> IO (Maybe String)
+RenderDrawPoints ren (x::xs) = (RenderDrawPoint ren x) <$ RenderDrawPoints ren xs
+RenderDrawPoints ren [] = return Nothing
+
+public
+RenderDrawLine : Renderer -> Point -> Point -> IO (Maybe String)
+RenderDrawLine (mkRenderer ren) (mkPoint x1 y1) (mkPoint x2 y2) =
     trySDL (mkForeign (FFun "SDL_RenderDrawLine" [FPtr, FInt, FInt, FInt, FInt] FInt) ren x1 y1 x2 y2)
+
+public total
+RenderDrawLines : Renderer -> List Point -> IO (Maybe String)
+RenderDrawLines ren (x::y::xs) = (RenderDrawLine ren x y) <$ (RenderDrawLines ren (y :: xs))
+RenderDrawLines ren (x::[]) = return Nothing
+RenderDrawLines ren [] = return Nothing
+
+public
+RenderDrawRect : Renderer -> Rect -> IO (Maybe String)
+RenderDrawRect (mkRenderer ren) (mkRect x y w h) =
+    trySDL (mkForeign (FFun "idris_SDL_renderDrawRect" [FPtr, FInt, FInt, FInt, FInt] FInt) ren x y w h)
+
+public total
+RenderDrawRects : Renderer -> List Rect -> IO (Maybe String)
+RenderDrawRects ren [] = return Nothing
+RenderDrawRects ren (x::xs) = RenderDrawRect ren x <$ RenderDrawRects ren xs
+
+
+public
+RenderFillRect : Renderer -> Rect -> IO (Maybe String)
+RenderFillRect (mkRenderer ren) (mkRect x y w h) =
+    trySDL (mkForeign (FFun "idris_SDL_renderFillRect" [FPtr, FInt, FInt, FInt, FInt] FInt) ren x y w h)
+
+public total
+RenderFillRects : Renderer -> List Rect -> IO (Maybe String)
+RenderFillRects ren [] = return Nothing
+RenderFillRects ren (x::xs) = RenderFillRect ren x <$ RenderFillRects ren xs
+
+public
+RenderCopy : Renderer -> Texture -> Rect -> Rect -> IO (Maybe String)
+RenderCopy (mkRenderer ren) (mkTexture txt) (mkRect sx sy sw sh) (mkRect dx dy dw dh) =
+    trySDL (mkForeign (FFun "idris_SDL_renderCopy" [FPtr, FPtr, FInt, FInt, FInt, FInt, FInt, FInt, FInt, FInt] FInt) ren txt sx sy sw sh dx dy dw dh)
+
+public
+data RendererFlip = FlipNone
+                  | FlipHorizontal
+                  | FlipVertical
+
+instance Flag Bits32 RendererFlip where
+    toFlag FlipNone       = 0x00000000
+    toFlag FlipHorizontal = 0x00000001
+    toFlag FlipVertical   = 0x00000002
+
+public
+RenderCopyEx : Renderer -> Texture -> Rect -> Rect -> Float -> Point -> RendererFlip -> IO (Maybe String)
+RenderCopyEx (mkRenderer ren) (mkTexture txt) (mkRect sx sy sw sh) (mkRect dx dy dw dh) angle (mkPoint cx cy) flip =
+    trySDL (mkForeign (FFun "idris_SDL_renderCopyEX" [FPtr, FPtr,
+                                                      FInt, FInt, FInt, FInt,
+                                                      FInt, FInt, FInt, FInt,
+                                                      FFloat, FInt, FInt, FBits32]
+           FInt) ren txt sx sy sw sh dx dy dw dh angle cx cy (toFlag flip))
+
+public
+RenderReadPixels : Renderer -> Rect -> {-PixelFormat-}Bits32 -> Int -> IO (Either String Pixels)
+RenderReadPixels (mkRenderer ren) (mkRect x y w h) format pitch =
+    trySDLRes
+        (mkForeign (FFun "idris_SDL_renderReadPixels" [FPtr, FInt, FInt, FInt, FInt, FBits32, FInt] FInt) ren x y w h format pitch)
+        [| mkPixels (mkForeign (FFun "idris_getSharedPixels" [] FPtr)) |]
+
+
 
 public
 SetRenderDrawColor : Renderer -> Color -> IO (Maybe String)
@@ -350,8 +457,3 @@ public
 RenderPresent : Renderer -> IO ()
 RenderPresent (mkRenderer ren) =
     mkForeign (FFun "SDL_RenderPresent" [FPtr] FUnit) ren
-
-public
-RenderClear : Renderer -> IO ()
-RenderClear (mkRenderer ren) =
-    mkForeign (FFun "SDL_RenderClear" [FPtr] FUnit) ren

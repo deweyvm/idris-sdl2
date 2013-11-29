@@ -13,6 +13,7 @@ import SDL.CPUInfo
 import SDL.Bits
 import SDL.GameController
 import SDL.Render
+import SDL.Array
 
 doInit : IO ()
 doInit = do
@@ -48,7 +49,7 @@ doWindow = do
             testRenderer rend
             RenderClear rend
             SetRenderDrawColor rend red
-            RenderDrawLine rend 0 0 100 100
+            RenderDrawLine rend (mkPoint 0 0) (mkPoint 100 100)
             RenderPresent rend
 
 main : IO ()

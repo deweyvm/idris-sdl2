@@ -60,4 +60,23 @@ void idris_SDL_renderGetViewport(SDL_Renderer* renderer);
 int idris_SDL_renderSetClipRect(SDL_Renderer* renderer, int x, int y, int w, int h);
 void idris_SDL_renderGetClipRect(SDL_Renderer* renderer);
 void idris_SDL_renderGetScale(SDL_Renderer* renderer);
+int idris_SDL_getRenderDrawColor(SDL_Renderer* renderer);
+int idris_SDL_getRenderDrawBlendMode(SDL_Renderer* renderer);
+int idris_SDL_renderDrawRect(SDL_Renderer* renderer, int x, int y, int w, int h);
+int idris_SDL_renderFillRect(SDL_Renderer* renderer, int x, int y, int w, int h);
+int idris_SDL_renderCopy(SDL_Renderer* renderer, SDL_Texture* texture,
+                         int sx, int sy, int sw, int sh,
+                         int dx, int dy, int dw, int dh);
+int idris_SDL_renderCopyEx(SDL_Renderer* renderer, SDL_Texture* texture,
+                           int sx, int sy, int sw, int sh,
+                           int dx, int dy, int dw, int dh,
+                           float angle, int cx, int cy, SDL_RendererFlip flip);
+
+int idris_SDL_renderReadPixels(SDL_Renderer* renderer,
+                               int x, int y, int w, int h,
+                               Uint32 format, int pitch);
+
+void* idris_getSharedPixels();
+
 #endif /* IDRIS_SDL_RENDER_H */
+

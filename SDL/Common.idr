@@ -1,5 +1,5 @@
 module SDL.Common
-
+--fixme -- put non sdl functions elsewhere
 import SDL.Error
 import Data.Bits
 
