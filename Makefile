@@ -7,7 +7,8 @@ SRCS = SDL/idris_SDL_video.c \
        SDL/idris_SDL_bits.c \
        SDL/idris_SDL_gamecontroller.c \
        SDL/idris_SDL_surface.c \
-       SDL/idris_SDL_render.c
+       SDL/idris_SDL_render.c \
+       SDL/idris_SDL_events.c
 
 OBJS = $(SRCS:.c=.o)
 

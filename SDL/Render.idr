@@ -459,3 +459,5 @@ public
 DestroyRenderer : Renderer -> IO ()
 DestroyRenderer (mkRenderer ren) =
     mkForeign (FFun "SDL_DestroyRenderer" [FPtr] FUnit) ren
+
+--skipped OGL functions
