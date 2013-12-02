@@ -1,7 +1,10 @@
 module SDL.Events
 
 import SDL.Common
+import SDL.Keyboard
 
+import SDL.ScanCode
+import SDL.KeyCode
 %include C "SDL2/SDL_events.h"
 %include C "SDL/idris_SDL_events.h"
 %link C "idris_SDL_events.o"
@@ -49,6 +52,47 @@ data EventType = Quit
                | DropFile
                | User
 
+instance Show EventType where
+    show Quit                     = "Quit"
+    show AppTerminating           = "AppTerminating"
+    show AppLowMemory             = "AppLowMemory"
+    show AppWillEnterBackground   = "AppWillEnterBackground"
+    show AppDidEnterBackground    = "AppDidEnterBackground"
+    show AppWillEnterForeground   = "AppWillEnterForeground"
+    show AppDidEnterForeground    = "AppDidEnterForeground"
+    show Window                   = "Window"
+    show Syswm                    = "Syswm"
+    show KeyDown                  = "KeyDown"
+    show KeyUp                    = "KeyUp"
+    show TextEditing              = "TextEditing"
+    show TextInput                = "TextInput"
+    show MouseMotion              = "MouseMotion"
+    show MouseButtonDown          = "MouseButtonDown"
+    show MouseButtonUp            = "MouseButtonUp"
+    show MouseWheel               = "MouseWheel"
+    show JoyAxisMotion            = "JoyAxisMotion"
+    show JoyBallMotion            = "JoyBallMotion"
+    show JoyHatMotion             = "JoyHatMotion"
+    show JoyButtonDown            = "JoyButtonDown"
+    show JoyButtonUp              = "JoyButtonUp"
+    show JoyDeviceAdded           = "JoyDeviceAdded"
+    show JoyDeviceRemoved         = "JoyDeviceRemoved"
+    show ControllerAxisMotion     = "ControllerAxisMotion"
+    show ControllerButtonDown     = "ControllerButtonDown"
+    show ControllerButtonUp       = "ControllerButtonUp"
+    show ControllerDeviceAdded    = "ControllerDeviceAdded"
+    show ControllerDeviceRemoved  = "ControllerDeviceRemoved"
+    show ControllerDeviceRemapped = "ControllerDeviceRemapped"
+    show FingerDown               = "FingerDown"
+    show FingerUp                 = "FingerUp"
+    show FingerMotion             = "FingerMotion"
+    show DollarGesture            = "DollarGesture"
+    show DollarRecord             = "DollarRecord"
+    show MultiGesture             = "MultiGesture"
+    show ClipboardUpdate          = "ClipboardUpdate"
+    show DropFile                 = "DropFile"
+    show User                     = "User"
+
 instance Flag Bits32 EventType where
     toFlag Quit                     = 0x100
     toFlag AppTerminating           = 0x101
@@ -93,42 +137,47 @@ instance Flag Bits32 EventType where
 instance Enumerable EventType where
     enumerate = [Quit, AppTerminating, AppLowMemory, AppWillEnterBackground, AppDidEnterBackground, AppWillEnterForeground, AppDidEnterForeground, Window, Syswm, KeyDown, KeyUp, TextEditing, TextInput, MouseMotion, MouseButtonDown, MouseButtonUp, MouseWheel, JoyAxisMotion, JoyBallMotion, JoyHatMotion, JoyButtonDown, JoyButtonUp, JoyDeviceAdded, JoyDeviceRemoved, ControllerAxisMotion, ControllerButtonDown, ControllerButtonUp, ControllerDeviceAdded, ControllerDeviceRemoved, ControllerDeviceRemapped, FingerDown, FingerUp, FingerMotion, DollarGesture, DollarRecord, MultiGesture, ClipboardUpdate, DropFile, User]
 
+public
 data ButtonEventType = ButtonUp
                      | ButtonDown
 
+public
 data FingerEventType = FingerEventUp
                      | FingerEventDown
                      | FingerEventMotion
 
+public
 data GestureEventType = GestureRecord
                       | GestureGesture
 
+public
 data JoyDeviceEventType = JoyDeviceEventAdded
                         | JoyDeviceEventRemoved
 
+public
 data ControllerDeviceEventType = ControllerDeviceEventAdded
                                | ControllerDeviceEventRemoved
                                | ControllerDeviceEventRemapped
 
-
+public
 data Event = WindowEvent Bits32 Bits8 Bits8 Bits8 Bits8 Int Int
-           | KeyboardEvent ButtonEventType Bits32 Bits8 Bits8 Bits8 Bits8 Ptr
+           | KeyboardEvent ButtonEventType Bits32 Bits8 Bits8 Bits8 Bits8 KeySym
            | TextEditingEvent Bits32 String Int Int
            | TextInputEvent Bits32 String
            | MouseMotionEvent Bits32 Bits32 Bits32 Int Int Int Int
            | MouseButtonEvent ButtonEventType Bits32 Bits32 Bits8 Bits8 Bits8 Bits8 Int Int
            | MouseWheelEvent Bits32 Bits32 Int Int
-           | JoyAxisEvent Ptr Bits8 Bits8 Bits8 Bits8 Bits32 Bits16
-           | JoyBallEvent Ptr Bits8 Bits8 Bits8 Bits8 Bits32 Bits32
-           | JoyHatEvent Ptr Bits8 Bits8 Bits8 Bits8
-           | JoyButtonEvent ButtonEventType Ptr Bits8 Bits8 Bits8 Bits8
+           | JoyAxisEvent Int Bits8 Bits8 Bits8 Bits8 Bits32 Bits16
+           | JoyBallEvent Int Bits8 Bits8 Bits8 Bits8 Bits32 Bits32
+           | JoyHatEvent Int Bits8 Bits8 Bits8 Bits8
+           | JoyButtonEvent ButtonEventType Int Bits8 Bits8 Bits8 Bits8
            | JoyDeviceEvent JoyDeviceEventType Int
-           | ControllerAxisEvent Ptr Bits8 Bits8 Bits8 Bits8 Bits32 Bits16
-           | ControllerButtonEvent ButtonEventType Ptr Bits8 Bits8 Bits8 Bits8
+           | ControllerAxisEvent Int Bits8 Bits8 Bits8 Bits8 Bits32 Bits16
+           | ControllerButtonEvent ButtonEventType Int Bits8 Bits8 Bits8 Bits8
            | ControllerDeviceEvent ControllerDeviceEventType Int
-           | TouchFingerEvent FingerEventType Ptr Ptr Float Float Float Float Float
-           | MultiGestureEvent Ptr Float Float Float Float Bits16 Bits16
-           | DollarGestureEvent GestureEventType Ptr Ptr Bits32 Float Float Float
+           | TouchFingerEvent FingerEventType Bits64 Bits64 Float Float Float Float Float
+           | MultiGestureEvent Bits64 Float Float Float Float Bits16 Bits16
+           | DollarGestureEvent GestureEventType Bits64 Bits64 Bits32 Float Float Float
            | DropEvent Ptr
            | QuitEvent
            | OSEvent
@@ -162,11 +211,17 @@ public
 FlushEvents : List EventType -> IO ()
 FlushEvents xs = sequence_ (map FlushEvent xs)-}
 
-getEventType : IO (Maybe EventType)
-getEventType = read `map` (mkForeign (FFun "idris_getEventType" [] FBits32))
+{- | If the code is valid, return the corresponding EventType
+     Otherwise, return the raw bit value -}
+getEventType : IO (Either Bits32 EventType)
+getEventType = do
+    rawCode <- (mkForeign (FFun "idris_getEventType" [] FBits32))
+    case read{e=EventType} rawCode of
+        Nothing => return $ Left rawCode
+        Just t => return $ Right t
 
 getTimestamp : IO Bits32
-getTimestamp = mkForeign (FFun "idris_SDL_commonEvent_timestamp" [] FBits32)
+getTimestamp = mkForeign (FFun "idris_getTimestamp" [] FBits32)
 
 
 getWindowEvent_windowID : IO Bits32
@@ -218,9 +273,25 @@ getKeyboardEvent_padding2 =
 getKeyboardEvent_padding3 : IO Bits8
 getKeyboardEvent_padding3 =
     mkForeign (FFun "idris_keyboardEvent_padding3" [] FBits8)
-getKeyboardEvent_keysym : IO Ptr
+
+
+getKeyboardEvent_keysym_scancode : IO ScanCode
+getKeyboardEvent_keysym_scancode =
+    (readOrElse ScanCode.Unknown) `map` (mkForeign (FFun "idris_keyboardEvent_keysym_scancode" [] FBits32))
+
+getKeyboardEvent_keysym_sym : IO KeyCode
+getKeyboardEvent_keysym_sym =
+    (readOrElse KeyCode.Unknown) `map` (mkForeign (FFun "idris_keyboardEvent_keysym_sym" [] FBits32))
+
+getKeyboardEvent_keysym_mod : IO (List KeyMod)
+getKeyboardEvent_keysym_mod =
+    bitMaskToFlags `map` (mkForeign (FFun "idris_keyboardEvent_keysym_mod" [] FBits32))
+
+getKeyboardEvent_keysym : IO KeySym
 getKeyboardEvent_keysym =
-    mkForeign (FFun "idris_keyboardEvent_keysym" [] FPtr)
+    [| mkKeySym getKeyboardEvent_keysym_scancode
+                getKeyboardEvent_keysym_sym
+                getKeyboardEvent_keysym_mod |]
 
 
 
@@ -367,9 +438,9 @@ getMouseWheelEvent =
                        getMouseWheelEvent_y |]
 
 
-getJoyAxisEvent_which : IO Ptr
+getJoyAxisEvent_which : IO Int
 getJoyAxisEvent_which =
-    mkForeign (FFun "idris_joyAxisEvent_which" [] FPtr)
+    mkForeign (FFun "idris_joyAxisEvent_which" [] FInt)
 getJoyAxisEvent_axis : IO Bits8
 getJoyAxisEvent_axis =
     mkForeign (FFun "idris_joyAxisEvent_axis" [] FBits8)
@@ -401,9 +472,9 @@ getJoyAxisEvent =
                     getJoyAxisEvent_padding4 |]
 
 
-getJoyBallEvent_which : IO Ptr
+getJoyBallEvent_which : IO Int
 getJoyBallEvent_which =
-    mkForeign (FFun "idris_joyBallEvent_which" [] FPtr)
+    mkForeign (FFun "idris_joyBallEvent_which" [] FInt)
 getJoyBallEvent_ball : IO Bits8
 getJoyBallEvent_ball =
     mkForeign (FFun "idris_joyBallEvent_ball" [] FBits8)
@@ -435,9 +506,9 @@ getJoyBallEvent =
                     getJoyBallEvent_yrel |]
 
 
-getJoyHatEvent_which : IO Ptr
+getJoyHatEvent_which : IO Int
 getJoyHatEvent_which =
-    mkForeign (FFun "idris_joyHatEvent_which" [] FPtr)
+    mkForeign (FFun "idris_joyHatEvent_which" [] FInt)
 getJoyHatEvent_hat : IO Bits8
 getJoyHatEvent_hat =
     mkForeign (FFun "idris_joyHatEvent_hat" [] FBits8)
@@ -461,9 +532,9 @@ getJoyHatEvent =
                    getJoyHatEvent_padding2 |]
 
 
-getJoyButtonEvent_which : IO Ptr
+getJoyButtonEvent_which : IO Int
 getJoyButtonEvent_which =
-    mkForeign (FFun "idris_joyButtonEvent_which" [] FPtr)
+    mkForeign (FFun "idris_joyButtonEvent_which" [] FInt)
 getJoyButtonEvent_button : IO Bits8
 getJoyButtonEvent_button =
     mkForeign (FFun "idris_joyButtonEvent_button" [] FBits8)
@@ -498,9 +569,9 @@ getJoyDeviceEvent type =
     [| JoyDeviceEvent (return type) getJoyDeviceEvent_which |]
 
 
-getControllerAxisEvent_which : IO Ptr
+getControllerAxisEvent_which : IO Int
 getControllerAxisEvent_which =
-    mkForeign (FFun "idris_controllerAxisEvent_which" [] FPtr)
+    mkForeign (FFun "idris_controllerAxisEvent_which" [] FInt)
 getControllerAxisEvent_axis : IO Bits8
 getControllerAxisEvent_axis =
     mkForeign (FFun "idris_controllerAxisEvent_axis" [] FBits8)
@@ -532,9 +603,9 @@ getControllerAxisEvent =
                            getControllerAxisEvent_padding4 |]
 
 
-getControllerButtonEvent_which : IO Ptr
+getControllerButtonEvent_which : IO Int
 getControllerButtonEvent_which =
-    mkForeign (FFun "idris_controllerButtonEvent_which" [] FPtr)
+    mkForeign (FFun "idris_controllerButtonEvent_which" [] FInt)
 getControllerButtonEvent_button : IO Bits8
 getControllerButtonEvent_button =
     mkForeign (FFun "idris_controllerButtonEvent_button" [] FBits8)
@@ -569,12 +640,12 @@ getControllerDeviceEvent type =
     [| ControllerDeviceEvent (return type) getControllerDeviceEvent_which |]
 
 
-getTouchFingerEvent_touchId : IO Ptr
+getTouchFingerEvent_touchId : IO Bits64
 getTouchFingerEvent_touchId =
-    mkForeign (FFun "idris_touchFingerEvent_touchId" [] FPtr)
-getTouchFingerEvent_fingerId : IO Ptr
+    mkForeign (FFun "idris_touchFingerEvent_touchId" [] FBits64)
+getTouchFingerEvent_fingerId : IO Bits64
 getTouchFingerEvent_fingerId =
-    mkForeign (FFun "idris_touchFingerEvent_fingerId" [] FPtr)
+    mkForeign (FFun "idris_touchFingerEvent_fingerId" [] FBits64)
 getTouchFingerEvent_x : IO Float
 getTouchFingerEvent_x =
     mkForeign (FFun "idris_touchFingerEvent_x" [] FFloat)
@@ -604,9 +675,9 @@ getTouchFingerEvent type =
                         getTouchFingerEvent_pressure |]
 
 
-getMultiGestureEvent_touchId : IO Ptr
+getMultiGestureEvent_touchId : IO Bits64
 getMultiGestureEvent_touchId =
-    mkForeign (FFun "idris_multiGestureEvent_touchId" [] FPtr)
+    mkForeign (FFun "idris_multiGestureEvent_touchId" [] FBits64)
 getMultiGestureEvent_dTheta : IO Float
 getMultiGestureEvent_dTheta =
     mkForeign (FFun "idris_multiGestureEvent_dTheta" [] FFloat)
@@ -638,12 +709,12 @@ getMultiGestureEvent =
                          getMultiGestureEvent_padding |]
 
 
-getDollarGestureEvent_touchId : IO Ptr
+getDollarGestureEvent_touchId : IO Bits64
 getDollarGestureEvent_touchId =
-    mkForeign (FFun "idris_dollarGestureEvent_touchId" [] FPtr)
-getDollarGestureEvent_gestureId : IO Ptr
+    mkForeign (FFun "idris_dollarGestureEvent_touchId" [] FBits64)
+getDollarGestureEvent_gestureId : IO Bits64
 getDollarGestureEvent_gestureId =
-    mkForeign (FFun "idris_dollarGestureEvent_gestureId" [] FPtr)
+    mkForeign (FFun "idris_dollarGestureEvent_gestureId" [] FBits64)
 getDollarGestureEvent_numFingers : IO Bits32
 getDollarGestureEvent_numFingers =
     mkForeign (FFun "idris_dollarGestureEvent_numFingers" [] FBits32)
@@ -760,12 +831,14 @@ getEvent t = case t of
 
 public
 PollEvent : IO (Either String (Bits32, Event))
-PollEvent = do
-    success <- mkForeign (FFun "idris_SDL_pollEvent" [] FInt)
-    code <- getEventType
-    time <- getTimestamp
-    case code of
-      Nothing => return $ Left "unknown event"
-      Just x => do
-        event <- [| (/*/) getTimestamp (getEvent x) |]
-        return $ Right event
+PollEvent =
+    trySDLRes
+        ((\x => 1 - x) `map` (mkForeign (FFun "idris_SDL_pollEvent" [] FInt)))
+        (do code <- getEventType
+            time <- getTimestamp
+            case code of
+              Left x => return $ (time, UnknownEvent AppDidEnterForeground{-fixme-})
+              Right x => do
+                putStrLn ("got event " ++ (show x))
+                [| (/*/) getTimestamp (getEvent x) |])
+

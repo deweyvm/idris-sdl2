@@ -17,7 +17,9 @@ import SDL.Render
 doInit : IO ()
 doInit = do
     init <- Init [InitEverything]
-    putStrLn $ show init
+    case init of
+        Just err => putStrLn err
+        Nothing => return ()
 
 testRenderer : Renderer -> IO ()
 testRenderer renderer = do
@@ -51,6 +53,21 @@ doWindow = do
             RenderDrawLine rend (mkPoint 0 0) (mkPoint 100 100)
             RenderPresent rend
 
+eventLoopTest : IO ()
+eventLoopTest = do
+    event <- PollEvent
+    case event of
+        Left err => do
+            Delay 10
+            eventLoopTest
+        Right (timestamp, event) =>
+            case event of
+                QuitEvent =>
+                    return()
+                a =>
+                    eventLoopTest
+
+
 main : IO ()
 main = do
     --drivers <- GetNumVideoDrivers
@@ -63,6 +80,7 @@ main = do
     clip <- GetClipboardText
     putStrLn $ "Clipboard: " ++ (show clip)
     Delay 1000
+
     num <- GetDisplayBounds 0
     mode <- GetDisplayMode 0 0
     putStrLn $ show num

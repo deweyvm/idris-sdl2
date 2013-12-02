@@ -26,6 +26,11 @@ class Enumerable a where
 read : (Eq a, Enumerable e, Flag a e) => a -> Maybe e
 read i = find (\x => toFlag x == i) enumerate
 
+readOrElse : (Eq a, Enumerable e, Flag a e) => e -> a -> e
+readOrElse def x = case read x of
+    Just x => x
+    Nothing => def
+
 decomposeBitMask : Bits32 -> List Bits32
 decomposeBitMask bits =
     (map (prim__andB32 bits) pows) where

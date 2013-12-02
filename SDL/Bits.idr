@@ -10,3 +10,4 @@ import SDL.Common
 public
 MostSignificantBitIndex32 : Bits32 -> Int
 MostSignificantBitIndex32 bits = unsafePerformIO (mkForeign (FFun "idris_SDL_mostSignificantBitIndex32" [FBits32] FInt) bits)
+

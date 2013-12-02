@@ -52,7 +52,7 @@ instance Show InitFlag where
 public
 Init : List InitFlag -> IO (Maybe String)
 Init flags = do
-    trySDL (mkForeign (FFun "SDL_Init" [FBits32] FInt) (sumBits flags))
+    trySDL ((\x => 1 - x) `map` (mkForeign (FFun "SDL_Init" [FBits32] FInt) (sumBits flags)))
 
 public
 InitSubSystem : List InitFlag -> IO (Maybe String)
