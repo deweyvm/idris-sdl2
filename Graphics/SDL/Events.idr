@@ -5,6 +5,7 @@ import Graphics.SDL.Keyboard
 
 import Graphics.SDL.ScanCode
 import Graphics.SDL.KeyCode
+
 %include C "SDL2/SDL_events.h"
 %include C "csrc/idris_SDL_events.h"
 %link C "idris_SDL_events.o"
@@ -190,16 +191,16 @@ PumpEvents = mkForeign (FFun "SDL_PumpEvents" [] FUnit)
 
 --int SDLCALL SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action, Uint32 minType, Uint32 maxType);
 
-{-public
+
 HasEvent : EventType -> IO Bool
 HasEvent t = do
-    [| fromSDLBool (mkForeign (FFun "SDL_HasEvent" [FBits32] FInt) (toFlag t)) |]-}
+    [| fromSDLBool (mkForeign (FFun "SDL_HasEvent" [FBits32] FInt) (toFlag t)) |]
 
 --fixme: should use some generalized filterM here
 findA : (Applicative f, Traversable ls) => (a -> f Bool) -> ls a -> f Bool
 findA fun xs = (map (any id)) (sequence (map fun xs))
 
-{-public
+public
 HasEvents : List EventType -> IO Bool
 HasEvents xs = findA HasEvent xs
 
@@ -209,7 +210,7 @@ FlushEvent t = mkForeign (FFun "SDL_FlushEvent" [FBits32] FUnit) (toFlag t)
 
 public
 FlushEvents : List EventType -> IO ()
-FlushEvents xs = sequence_ (map FlushEvent xs)-}
+FlushEvents xs = sequence_ (map FlushEvent xs)
 
 {- | If the code is valid, return the corresponding EventType
      Otherwise, return the raw bit value -}
@@ -246,7 +247,6 @@ getWindowEvent_data2 : IO Int
 getWindowEvent_data2 =
     mkForeign (FFun "idris_windowEvent_data2" [] FInt)
 
-public
 getWindowEvent : IO Event
 getWindowEvent =
     [| WindowEvent getWindowEvent_windowID
@@ -295,7 +295,6 @@ getKeyboardEvent_keysym =
 
 
 
-public
 getKeyboardEvent : ButtonEventType -> IO Event
 getKeyboardEvent button =
     [| KeyboardEvent (return button)
@@ -320,7 +319,6 @@ getTextEditingEvent_length : IO Int
 getTextEditingEvent_length =
     mkForeign (FFun "idris_textEditingEvent_length" [] FInt)
 
-public
 getTextEditingEvent : IO Event
 getTextEditingEvent =
     [| TextEditingEvent getTextEditingEvent_windowID
@@ -336,7 +334,6 @@ getTextInputEvent_text : IO String
 getTextInputEvent_text =
     mkForeign (FFun "idris_textInputEvent_text" [] FString)
 
-public
 getTextInputEvent : IO Event
 getTextInputEvent =
     [| TextInputEvent getTextInputEvent_windowID
@@ -365,7 +362,6 @@ getMouseMotionEvent_yrel : IO Int
 getMouseMotionEvent_yrel =
     mkForeign (FFun "idris_mouseMotionEvent_yrel" [] FInt)
 
-public
 getMouseMotionEvent : IO Event
 getMouseMotionEvent =
     [| MouseMotionEvent getMouseMotionEvent_windowID
@@ -402,7 +398,6 @@ getMouseButtonEvent_y : IO Int
 getMouseButtonEvent_y =
     mkForeign (FFun "idris_mouseButtonEvent_y" [] FInt)
 
-public
 getMouseButtonEvent : ButtonEventType -> IO Event
 getMouseButtonEvent button =
     [| MouseButtonEvent (return button)
@@ -429,7 +424,6 @@ getMouseWheelEvent_y : IO Int
 getMouseWheelEvent_y =
     mkForeign (FFun "idris_mouseWheelEvent_y" [] FInt)
 
-public
 getMouseWheelEvent : IO Event
 getMouseWheelEvent =
     [| MouseWheelEvent getMouseWheelEvent_windowID
@@ -460,7 +454,6 @@ getJoyAxisEvent_padding4 : IO Bits16
 getJoyAxisEvent_padding4 =
     mkForeign (FFun "idris_joyAxisEvent_padding4" [] FBits16)
 
-public
 getJoyAxisEvent : IO Event
 getJoyAxisEvent =
     [| JoyAxisEvent getJoyAxisEvent_which
@@ -494,7 +487,6 @@ getJoyBallEvent_yrel : IO Bits32
 getJoyBallEvent_yrel =
     mkForeign (FFun "idris_joyBallEvent_yrel" [] FBits32)
 
-public
 getJoyBallEvent : IO Event
 getJoyBallEvent =
     [| JoyBallEvent getJoyBallEvent_which
@@ -522,7 +514,6 @@ getJoyHatEvent_padding2 : IO Bits8
 getJoyHatEvent_padding2 =
     mkForeign (FFun "idris_joyHatEvent_padding2" [] FBits8)
 
-public
 getJoyHatEvent : IO Event
 getJoyHatEvent =
     [| JoyHatEvent getJoyHatEvent_which
@@ -548,7 +539,6 @@ getJoyButtonEvent_padding2 : IO Bits8
 getJoyButtonEvent_padding2 =
     mkForeign (FFun "idris_joyButtonEvent_padding2" [] FBits8)
 
-public
 getJoyButtonEvent : ButtonEventType -> IO Event
 getJoyButtonEvent button =
     [| JoyButtonEvent (return button)
@@ -563,7 +553,6 @@ getJoyDeviceEvent_which : IO Int
 getJoyDeviceEvent_which =
     mkForeign (FFun "idris_joyDeviceEvent_which" [] FInt)
 
-public
 getJoyDeviceEvent : JoyDeviceEventType -> IO Event
 getJoyDeviceEvent type =
     [| JoyDeviceEvent (return type) getJoyDeviceEvent_which |]
@@ -591,7 +580,6 @@ getControllerAxisEvent_padding4 : IO Bits16
 getControllerAxisEvent_padding4 =
     mkForeign (FFun "idris_controllerAxisEvent_padding4" [] FBits16)
 
-public
 getControllerAxisEvent : IO Event
 getControllerAxisEvent =
     [| ControllerAxisEvent getControllerAxisEvent_which
@@ -619,7 +607,6 @@ getControllerButtonEvent_padding2 : IO Bits8
 getControllerButtonEvent_padding2 =
     mkForeign (FFun "idris_controllerButtonEvent_padding2" [] FBits8)
 
-public
 getControllerButtonEvent : ButtonEventType -> IO Event
 getControllerButtonEvent button =
     [| ControllerButtonEvent (return button)
@@ -634,7 +621,6 @@ getControllerDeviceEvent_which : IO Int
 getControllerDeviceEvent_which =
     mkForeign (FFun "idris_controllerDeviceEvent_which" [] FInt)
 
-public
 getControllerDeviceEvent : ControllerDeviceEventType -> IO Event
 getControllerDeviceEvent type =
     [| ControllerDeviceEvent (return type) getControllerDeviceEvent_which |]
@@ -662,7 +648,6 @@ getTouchFingerEvent_pressure : IO Float
 getTouchFingerEvent_pressure =
     mkForeign (FFun "idris_touchFingerEvent_pressure" [] FFloat)
 
-public
 getTouchFingerEvent : FingerEventType -> IO Event
 getTouchFingerEvent type =
     [| TouchFingerEvent (return type)
@@ -697,7 +682,6 @@ getMultiGestureEvent_padding : IO Bits16
 getMultiGestureEvent_padding =
     mkForeign (FFun "idris_multiGestureEvent_padding" [] FBits16)
 
-public
 getMultiGestureEvent : IO Event
 getMultiGestureEvent =
     [| MultiGestureEvent getMultiGestureEvent_touchId
@@ -728,7 +712,6 @@ getDollarGestureEvent_y : IO Float
 getDollarGestureEvent_y =
     mkForeign (FFun "idris_dollarGestureEvent_y" [] FFloat)
 
-public
 getDollarGestureEvent : GestureEventType -> IO Event
 getDollarGestureEvent type =
     [| DollarGestureEvent (return type)
@@ -744,7 +727,6 @@ getDropEvent_file : IO Ptr
 getDropEvent_file =
     mkForeign (FFun "idris_dropEvent_file" [] FPtr)
 
-public
 getDropEvent : IO Event
 getDropEvent =
     [| DropEvent getDropEvent_file |]
@@ -763,7 +745,6 @@ getUserEvent_data2 : IO Ptr
 getUserEvent_data2 =
     mkForeign (FFun "idris_userEvent_data2" [] FPtr)
 
-public
 getUserEvent : IO Event
 getUserEvent =
     [| UserEvent getUserEvent_windowID
@@ -776,7 +757,6 @@ getSysWMEvent_msg : IO Ptr
 getSysWMEvent_msg =
     mkForeign (FFun "idris_sysWMEvent_msg" [] FPtr)
 
-public
 getSysWMEvent : IO Event
 getSysWMEvent =
     [| SysWMEvent getSysWMEvent_msg |]
@@ -832,13 +812,12 @@ getEvent t = case t of
 public
 PollEvent : IO (Either String (Bits32, Event))
 PollEvent =
-    trySDLRes
+    doSDLIf
         ((\x => 1 - x) `map` (mkForeign (FFun "idris_SDL_pollEvent" [] FInt)))
         (do code <- getEventType
             time <- getTimestamp
             case code of
               Left x => return $ (time, UnknownEvent AppDidEnterForeground{-fixme-})
               Right x => do
-                putStrLn ("got event " ++ (show x))
                 [| (/*/) getTimestamp (getEvent x) |])
 

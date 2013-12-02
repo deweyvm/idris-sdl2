@@ -17,11 +17,11 @@ instance (Show a, Show b) => Show (Either a b) where
 class Flag n a where
     toFlag : a -> n
 
-sumBits : (Flag Bits32 a) => List a -> Bits32
-sumBits flags = foldl prim__orB32 0x0 (map toFlag flags)
-
 class Enumerable a where
     enumerate : List a
+
+sumBits : (Flag Bits32 a) => List a -> Bits32
+sumBits flags = foldl prim__orB32 0x0 (map toFlag flags)
 
 read : (Eq a, Enumerable e, Flag a e) => a -> Maybe e
 read i = find (\x => toFlag x == i) enumerate
@@ -31,6 +31,7 @@ readOrElse def x = case read x of
     Just x => x
     Nothing => def
 
+private
 decomposeBitMask : Bits32 -> List Bits32
 decomposeBitMask bits =
     (map (prim__andB32 bits) pows) where
@@ -58,9 +59,8 @@ getError = do
 
 --fixme - probably no one will check this -- how to solve?
 --wraps IO actions which can fail
---fixme rename
-trySDL : IO Int -> IO (Maybe String)
-trySDL action = do
+doSDL : IO Int -> IO (Maybe String)
+doSDL action = do
     success <- [| fromSDLBool action |]
     if (not success)
       then do
@@ -69,9 +69,12 @@ trySDL action = do
       else do
         return Nothing
 
---fixme rename
-trySDLRes : IO Int -> IO a -> IO (Either String a)
-trySDLRes try' getter = do
+--wraps IO actions which return an action, but may fail
+--first arg is the int status return value of many SDL library functions.
+--we expect 1 to mean success, but many SDL functions return 0 instead. this
+--must be taken care of in the wrapper library.
+doSDLIf : IO Int -> IO a -> IO (Either String a)
+doSDLIf try' getter = do
     success <- [| fromSDLBool try' |]
     if (not success)
       then do

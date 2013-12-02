@@ -9,7 +9,7 @@ import Graphics.SDL.SDL
 public
 SetClipboardText : String -> IO (Maybe String)
 SetClipboardText text = do
-    trySDL (mkForeign (FFun "SDL_SetClipboardText" [FString] FInt) text)
+    doSDL (mkForeign (FFun "SDL_SetClipboardText" [FString] FInt) text)
 
 public
 HasClipboardText : IO Bool
@@ -26,7 +26,7 @@ GetClipboardText = do
        then
          return $ Left "<empty>"
        else do
-         trySDLRes
+         doSDLIf
              (mkForeign (FFun "idris_SDL_getClipboardText" [] FInt))
              (mkForeign (FFun "idris_SDL_getClipboardText_string" [] FString)
                 <$ mkForeign (FFun "idris_SDL_getClipboardText_free" [] FUnit))

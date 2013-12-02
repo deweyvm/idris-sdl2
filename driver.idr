@@ -70,8 +70,6 @@ eventLoopTest = do
 
 main : IO ()
 main = do
-    --drivers <- GetNumVideoDrivers
-    --driver <- GetCurrentVideoDriver
     doInit
     i <- GetInit
     putStrLn $ show i

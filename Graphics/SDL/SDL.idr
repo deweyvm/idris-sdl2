@@ -52,12 +52,12 @@ instance Show InitFlag where
 public
 Init : List InitFlag -> IO (Maybe String)
 Init flags = do
-    trySDL ((\x => 1 - x) `map` (mkForeign (FFun "SDL_Init" [FBits32] FInt) (sumBits flags)))
+    doSDL ((\x => 1 - x) `map` (mkForeign (FFun "SDL_Init" [FBits32] FInt) (sumBits flags)))
 
 public
 InitSubSystem : List InitFlag -> IO (Maybe String)
 InitSubSystem flags = do
-    trySDL (mkForeign (FFun "SDL_InitSubSystem" [FBits32] FInt) (sumBits flags))
+    doSDL (mkForeign (FFun "SDL_InitSubSystem" [FBits32] FInt) (sumBits flags))
 
 --for the C behavior when passing 0, use GetInit
 public

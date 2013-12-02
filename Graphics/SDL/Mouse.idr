@@ -83,7 +83,7 @@ WarpMouseInWindow (mkWindow ptr) x y =
 public
 SetRelativeMouseMode : Bool -> IO (Maybe String)
 SetRelativeMouseMode b =
-    trySDL (mkForeign (FFun "SDL_SetRelativeMouseMode" [FInt] FInt) (toSDLBool b))
+    doSDL (mkForeign (FFun "SDL_SetRelativeMouseMode" [FInt] FInt) (toSDLBool b))
 
 public
 GetRelativeMouseMode : IO Bool
@@ -97,21 +97,21 @@ getCursor =
 public
 CreateCursor : Ptr -> Ptr -> Int -> Int -> Int -> Int -> IO (Either String Cursor)
 CreateCursor data' mask w h hot_x hot_y =
-    trySDLRes
+    doSDLIf
         (mkForeign (FFun "idris_SDL_createCursor" [FPtr, FPtr, FInt, FInt, FInt, FInt] FInt) data' mask w h hot_x hot_y)
         getCursor
 
 public
 CreateColorCursor : Surface -> Int -> Int -> IO (Either String Cursor)
 CreateColorCursor (mkSurface ptr) hot_x hot_y =
-    trySDLRes
+    doSDLIf
         (mkForeign (FFun "idris_SDL_createColorCursor" [FPtr, FInt, FInt] FInt) ptr hot_x hot_y)
         getCursor
 
 public
 CreateSystemCursor : SystemCursor -> IO (Either String Cursor)
 CreateSystemCursor flag =
-    trySDLRes
+    doSDLIf
         (mkForeign (FFun "idris_SDL_createSystemCursor" [FBits32] FInt) (toFlag flag))
         getCursor
 
@@ -124,14 +124,14 @@ SetCursor (mkCursor ptr) =
 public
 GetCursor : IO (Either String Cursor)
 GetCursor =
-    trySDLRes
+    doSDLIf
         (mkForeign (FFun "idris_SDL_getCursor" [] FInt))
         getCursor
 
 public
 GetDefaultCursor : IO (Either String Cursor)
 GetDefaultCursor =
-    trySDLRes
+    doSDLIf
         (mkForeign (FFun "SDL_GetDefaultCursor" [] FInt))
         getCursor
 

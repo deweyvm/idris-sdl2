@@ -13,7 +13,7 @@ data GameController = mkGameController Ptr
 public
 GameControllerAddMapping : IO (Maybe String)
 GameControllerAddMapping = do
-    trySDL (mkForeign (FFun "SDL_GameControllerAddMapping" [] FInt))
+    doSDL (mkForeign (FFun "SDL_GameControllerAddMapping" [] FInt))
 
 freeSharedString : IO ()
 freeSharedString = mkForeign (FFun "idris_gameController_sharedString_free" [] FUnit)
@@ -22,7 +22,7 @@ freeSharedString = mkForeign (FFun "idris_gameController_sharedString_free" [] F
 public
 GameControllerMappingForGUID : JoystickGUID -> IO (Either String String)
 GameControllerMappingForGUID (mkJoystickGUID bits) = do
-    trySDLRes
+    doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerMappingForGUID" [FBits16x8] FInt) bits)
         (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
             <$ freeSharedString)
@@ -30,7 +30,7 @@ GameControllerMappingForGUID (mkJoystickGUID bits) = do
 public
 GameControllerMapping : GameController -> IO (Either String String)
 GameControllerMapping (mkGameController ptr) = do
-    trySDLRes
+    doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerMapping" [FPtr] FInt) ptr)
         (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
             <$ freeSharedString)
@@ -43,7 +43,7 @@ IsGameController id = do
 public
 GameControllerNameForIndex : Int -> IO (Either String String)
 GameControllerNameForIndex id = do
-    trySDLRes
+    doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerNameForIndex" [FInt] FInt) id)
         (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
             <$ freeSharedString)
@@ -51,7 +51,7 @@ GameControllerNameForIndex id = do
 public
 GameControllerOpen : Int -> IO (Either String GameController)
 GameControllerOpen id = do
-    trySDLRes
+    doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerOpen" [FInt] FInt) id)
         [| mkGameController (mkForeign (FFun "idris_sharedGameController_controller" [] FPtr)) |]
 
