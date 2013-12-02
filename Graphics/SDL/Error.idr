@@ -1,6 +1,6 @@
-module SDL.Error
+module Graphics.SDL.Error
 
-import SDL.Common
+import Graphics.SDL.Common
 
 %include C "SDL2/SDL_error.h"
 

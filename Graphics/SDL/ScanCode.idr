@@ -1,6 +1,6 @@
-module SDL.ScanCode
+module Graphics.SDL.ScanCode
 
-import SDL.Common
+import Graphics.SDL.Common
 
 data ScanCode = Unknown
               | A

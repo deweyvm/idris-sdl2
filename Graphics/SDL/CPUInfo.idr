@@ -1,6 +1,6 @@
-module SDL.CPUInfo
+module Graphics.SDL.CPUInfo
 
-import SDL.Common
+import Graphics.SDL.Common
 
 %include C "SDL2/SDL_cpuinfo.h"
 

@@ -1,6 +1,6 @@
-module SDL.KeyCode
+module Graphics.SDL.KeyCode
 
-import SDL.Common
+import Graphics.SDL.Common
 
 
 data KeyCode = Unknown

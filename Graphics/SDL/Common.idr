@@ -1,6 +1,6 @@
-module SDL.Common
+module Graphics.SDL.Common
 --fixme -- put non sdl functions elsewhere
-import SDL.Error
+import Graphics.SDL.Error
 import Data.Bits
 
 %lib C "SDL2"

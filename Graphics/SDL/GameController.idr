@@ -1,9 +1,9 @@
-module SDL.GameController
+module Graphics.SDL.GameController
 
-import SDL.Common
+import Graphics.SDL.Common
 
 %include C "SDL2/SDL_gamecontroller.h"
-%include C "SDL/idris_SDL_gamecontroller.h"
+%include C "csrc/idris_SDL_gamecontroller.h"
 %link C "idris_SDL_gamecontroller.o"
 
 data JoystickGUID = mkJoystickGUID Bits16x8

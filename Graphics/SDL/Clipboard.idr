@@ -1,9 +1,9 @@
-module SDL.Clipboard
+module Graphics.SDL.Clipboard
 
-import SDL.SDL
+import Graphics.SDL.SDL
 
 %include C "SDL2/SDL_clipboard.h"
-%include C "SDL/idris_SDL_clipboard.h"
+%include C "csrc/idris_SDL_clipboard.h"
 %link C "idris_SDL_clipboard.o"
 
 public

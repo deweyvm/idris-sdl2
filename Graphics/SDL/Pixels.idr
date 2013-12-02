@@ -1,4 +1,4 @@
-module SDL.Pixels
+module Graphics.SDL.Pixels
 
 public
 data Pixels = mkPixels Ptr

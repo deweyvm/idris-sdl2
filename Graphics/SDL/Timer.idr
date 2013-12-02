@@ -1,6 +1,6 @@
-module SDL.Timer
+module Graphics.SDL.Timer
 
-import SDL.Common
+import Graphics.SDL.Common
 
 %include C "SDL2/SDL_timer.h"
 

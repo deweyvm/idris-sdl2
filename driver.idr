@@ -1,18 +1,18 @@
 module Main
 
-import SDL.Common
-import SDL.SDL
-import SDL.Timer
-import SDL.Rect
-import SDL.Video
-import SDL.Mouse
-import SDL.Clipboard
-import SDL.Events
-import SDL.BlendMode
-import SDL.CPUInfo
-import SDL.Bits
-import SDL.GameController
-import SDL.Render
+import Graphics.SDL.Common
+import Graphics.SDL.SDL
+import Graphics.SDL.Timer
+import Graphics.SDL.Rect
+import Graphics.SDL.Video
+import Graphics.SDL.Mouse
+import Graphics.SDL.Clipboard
+import Graphics.SDL.Events
+import Graphics.SDL.BlendMode
+import Graphics.SDL.CPUInfo
+import Graphics.SDL.Bits
+import Graphics.SDL.GameController
+import Graphics.SDL.Render
 
 doInit : IO ()
 doInit = do

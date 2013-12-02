@@ -1,7 +1,7 @@
-module SDL.Surface
+module Graphics.SDL.Surface
 
-import SDL.Common
-import SDL.Rect
+import Graphics.SDL.Common
+import Graphics.SDL.Rect
 
 %include C "SDL2/SDL_surface.h"
 

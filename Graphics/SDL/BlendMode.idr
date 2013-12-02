@@ -1,6 +1,6 @@
-module SDL.BlendMode
+module Graphics.SDL.BlendMode
 
-import SDL.Common
+import Graphics.SDL.Common
 
 data BlendMode = BlendModeNone
                | BlendModeBlend

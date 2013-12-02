@@ -1,6 +1,6 @@
-module SDL.Rect
+module Graphics.SDL.Rect
 
-import SDL.Common
+import Graphics.SDL.Common
 
 data Rect = mkRect Int Int Int Int
 data Point = mkPoint Int Int

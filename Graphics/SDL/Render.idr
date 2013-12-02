@@ -1,12 +1,12 @@
-module SDL.Render
+module Graphics.SDL.Render
 
-import SDL.Common
-import SDL.Video
-import SDL.BlendMode
-import SDL.Pixels
+import Graphics.SDL.Common
+import Graphics.SDL.Video
+import Graphics.SDL.BlendMode
+import Graphics.SDL.Pixels
 
 %include C "SDL2/SDL_render.h"
-%include C "SDL/idris_SDL_render.h"
+%include C "csrc/idris_SDL_render.h"
 %link C "idris_SDL_render.o"
 
 public

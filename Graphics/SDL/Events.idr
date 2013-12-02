@@ -1,12 +1,12 @@
-module SDL.Events
+module Graphics.SDL.Events
 
-import SDL.Common
-import SDL.Keyboard
+import Graphics.SDL.Common
+import Graphics.SDL.Keyboard
 
-import SDL.ScanCode
-import SDL.KeyCode
+import Graphics.SDL.ScanCode
+import Graphics.SDL.KeyCode
 %include C "SDL2/SDL_events.h"
-%include C "SDL/idris_SDL_events.h"
+%include C "csrc/idris_SDL_events.h"
 %link C "idris_SDL_events.o"
 
 --OSEvent is missing because i dont see how you would get one, there is

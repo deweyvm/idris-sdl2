@@ -1,7 +1,7 @@
-module SDL.SDL
+module Graphics.SDL.SDL
 
-import SDL.Common
-import SDL.Error
+import Graphics.SDL.Common
+import Graphics.SDL.Error
 
 %include C "SDL2/SDL.h"
 

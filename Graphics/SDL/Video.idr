@@ -1,13 +1,13 @@
-module SDL.Video
+module Graphics.SDL.Video
 
-import SDL.Common
-import SDL.SDL
-import SDL.Rect
-import SDL.Surface
+import Graphics.SDL.Common
+import Graphics.SDL.SDL
+import Graphics.SDL.Rect
+import Graphics.SDL.Surface
 import Data.Bits
 
 %include C "SDL2/SDL_video.h"
-%include C "SDL/idris_SDL_video.h"
+%include C "csrc/idris_SDL_video.h"
 %link C "idris_SDL_video.o"
 
 --a window must never be null. We must assure through our C wrapper that a null

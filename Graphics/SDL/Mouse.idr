@@ -1,11 +1,11 @@
-module SDL.Mouse
+module Graphics.SDL.Mouse
 
-import SDL.Common
-import SDL.Video
-import SDL.Surface
+import Graphics.SDL.Common
+import Graphics.SDL.Video
+import Graphics.SDL.Surface
 
 %include C "SDL2/SDL_mouse.h"
-%include C "SDL/idris_SDL_mouse.h"
+%include C "csrc/idris_SDL_mouse.h"
 %link C "idris_SDL_mouse.o"
 
 data Cursor = mkCursor Ptr
