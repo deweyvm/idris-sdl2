@@ -16,15 +16,15 @@ data KeySym = mkKeySym ScanCode KeyCode (List KeyMod)
 
 
 public
-GetKeyboardFocus : IO (Maybe Window)
-GetKeyboardFocus =
+getKeyboardFocus : IO (Maybe Window)
+getKeyboardFocus =
     doSDLMaybe
         (mkForeign (FFun "idris_SDL_getKeyboardFocus" [] FInt))
         [| mkWindow (mkForeign (FFun "idris_SDL_getKeyboardFocus_window" [] FPtr)) |]
 
 public
-GetKeyboardState : IO (Either String (List Bool))
-GetKeyboardState =
+getKeyboardState : IO (Either String (List Bool))
+getKeyboardState =
     doSDLIf
       (mkForeign (FFun "idris_SDL_getKeyboardState" [] FInt))
       (do length <- mkForeign (FFun "idris_getKeyboardState_length" [] FInt)
@@ -37,67 +37,67 @@ GetKeyboardState =
         getBool _ = fromSDLBool `map` (mkForeign (FFun "idris_getKeyboardState_keystate" [] FInt))
 
 public
-GetModState : IO (Maybe KeyMod)
-GetModState = [| read (mkForeign (FFun "SDL_GetModState" [] FBits32)) |]
+getModState : IO (Maybe KeyMod)
+getModState = [| read (mkForeign (FFun "SDL_GetModState" [] FBits32)) |]
 
 public
-SetModState : KeyMod -> IO ()
-SetModState mod = mkForeign (FFun "SDL_SetModState" [FBits32] FUnit) (toFlag mod)
+setModState : KeyMod -> IO ()
+setModState mod = mkForeign (FFun "SDL_SetModState" [FBits32] FUnit) (toFlag mod)
 
 --probably doesnt need to be SDL call
 public
-GetKeyFromScancode : ScanCode -> IO (Maybe KeyCode)
-GetKeyFromScancode scan =
+getKeyFromScancode : ScanCode -> IO (Maybe KeyCode)
+getKeyFromScancode scan =
     [| read (mkForeign (FFun "SDL_GetKeyFromScancode" [FBits32] FBits32) (toFlag scan)) |]
 
 --probably doesnt need to be SDL call
 public
-GetScancodeFromKey : KeyCode -> IO (Maybe ScanCode)
-GetScancodeFromKey key =
+getScancodeFromKey : KeyCode -> IO (Maybe ScanCode)
+getScancodeFromKey key =
     [| read (mkForeign (FFun "SDL_GetScancodeFromKey" [FBits32] FBits32) (toFlag key)) |]
 
 public
-GetScancodeName : ScanCode -> IO String
-GetScancodeName scan = mkForeign (FFun "SDL_GetScancodeName" [FBits32] FString) (toFlag scan)
+getScancodeName : ScanCode -> IO String
+getScancodeName scan = mkForeign (FFun "SDL_GetScancodeName" [FBits32] FString) (toFlag scan)
 
 public
-GetScancodeFromName : String -> IO ScanCode
-GetScancodeFromName name =
+getScancodeFromName : String -> IO ScanCode
+getScancodeFromName name =
     [| (readOrElse ScanCode.Unknown) (mkForeign (FFun "SDL_GetScancodeFromName" [FString] FBits32) name) |]
 
 public
-GetKeyName : KeyCode -> IO String
-GetKeyName key = mkForeign (FFun "SDL_GetKeyName" [FBits32] FString) (toFlag key)
+getKeyName : KeyCode -> IO String
+getKeyName key = mkForeign (FFun "SDL_GetKeyName" [FBits32] FString) (toFlag key)
 
 public
-GetKeyFromName : String -> IO KeyCode
-GetKeyFromName name =
+getKeyFromName : String -> IO KeyCode
+getKeyFromName name =
     [| (readOrElse KeyCode.Unknown) (mkForeign (FFun "SDL_GetKeyFromName" [FString] FBits32) name) |]
 
 public
-StartTextInput : IO ()
-StartTextInput = mkForeign (FFun "SDL_StartTextInput" [] FUnit)
+startTextInput : IO ()
+startTextInput = mkForeign (FFun "SDL_StartTextInput" [] FUnit)
 
 public
-IsTextInputActive : IO Bool
-IsTextInputActive =
+isTextInputActive : IO Bool
+isTextInputActive =
     [| fromSDLBool (mkForeign (FFun "SDL_IsTextInputActive" [] FInt)) |]
 
 public
-StopTextInput : IO ()
-StopTextInput = mkForeign (FFun "SDL_StopTextInput" [] FUnit)
+stopTextInput : IO ()
+stopTextInput = mkForeign (FFun "SDL_StopTextInput" [] FUnit)
 
 public
-SetTextInputRect : Rect -> IO ()
-SetTextInputRect (mkRect x y w h) =
+setTextInputRect : Rect -> IO ()
+setTextInputRect (mkRect x y w h) =
     mkForeign (FFun "idris_SDL_setTextInputRect" [FInt, FInt, FInt, FInt] FUnit) x y w h
 
 public
-HasScreenKeyboardSupport : IO Bool
-HasScreenKeyboardSupport =
+hasScreenKeyboardSupport : IO Bool
+hasScreenKeyboardSupport =
     [| fromSDLBool (mkForeign (FFun "SDL_HasScreenKeyboardSupport" [] FInt)) |]
 
 public
-IsScreenKeyboardShown : Window -> Bool
-IsScreenKeyboardShown (mkWindow win) =
+isScreenKeyboardShown : Window -> IO Bool
+isScreenKeyboardShown (mkWindow win) =
     [| fromSDLBool (mkForeign (FFun "SDL_IsScreenKeyboardShown" [FPtr] FInt) win) |]

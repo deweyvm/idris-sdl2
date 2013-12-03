@@ -45,8 +45,8 @@ data MouseState = mkMouseState Int Int Bits32
 
 --fixme -- return maybe for null ptr
 public
-GetMouseFocus : IO Window
-GetMouseFocus =
+getMouseFocus : IO Window
+getMouseFocus =
     [| mkWindow (mkForeign (FFun "SDL_GetMouseFocus" [] FPtr)) |]
 
 
@@ -60,8 +60,8 @@ getMouseState_state : IO Bits32
 getMouseState_state = mkForeign (FFun "idris_SDL_getMouseState_state" [] FBits32)
 
 public
-GetMouseState : IO MouseState
-GetMouseState = [| mkMouseState getSharedX
+getMouseState : IO MouseState
+getMouseState = [| mkMouseState getSharedX
                                 getSharedY
                                 getMouseState_state |]
 
@@ -69,91 +69,91 @@ getRelativeMouseState_state : IO Bits32
 getRelativeMouseState_state = mkForeign (FFun "idris_SDL_getRelativeMouseState_state" [] FBits32)
 
 public
-GetRelativeMouseState : IO MouseState
-GetRelativeMouseState = do
+getRelativeMouseState : IO MouseState
+getRelativeMouseState = do
     [| mkMouseState getSharedX
                     getSharedY
                     getRelativeMouseState_state |]
 
 public
-WarpMouseInWindow : Window -> Int -> Int -> IO ()
-WarpMouseInWindow (mkWindow ptr) x y =
+warpMouseInWindow : Window -> Int -> Int -> IO ()
+warpMouseInWindow (mkWindow ptr) x y =
     mkForeign (FFun "SDL_WarpMouseInWindow" [FPtr, FInt, FInt] FUnit) ptr x y
 
 public
-SetRelativeMouseMode : Bool -> IO (Maybe String)
-SetRelativeMouseMode b =
+setRelativeMouseMode : Bool -> IO (Maybe String)
+setRelativeMouseMode b =
     doSDL (mkForeign (FFun "SDL_SetRelativeMouseMode" [FInt] FInt) (toSDLBool b))
 
 public
-GetRelativeMouseMode : IO Bool
-GetRelativeMouseMode =
+getRelativeMouseMode : IO Bool
+getRelativeMouseMode =
     [| fromSDLBool (mkForeign (FFun "SDL_GetRelativeMouseMode" [] FInt)) |]
 
-getCursor : IO Cursor
-getCursor =
+getCursor' : IO Cursor
+getCursor' =
     [| mkCursor (mkForeign (FFun "idris_sharedCursor" [] FPtr)) |]
 
 public
-CreateCursor : Ptr -> Ptr -> Int -> Int -> Int -> Int -> IO (Either String Cursor)
-CreateCursor data' mask w h hot_x hot_y =
+createCursor : Ptr -> Ptr -> Int -> Int -> Int -> Int -> IO (Either String Cursor)
+createCursor data' mask w h hot_x hot_y =
     doSDLIf
         (mkForeign (FFun "idris_SDL_createCursor" [FPtr, FPtr, FInt, FInt, FInt, FInt] FInt) data' mask w h hot_x hot_y)
-        getCursor
+        getCursor'
 
 public
-CreateColorCursor : Surface -> Int -> Int -> IO (Either String Cursor)
-CreateColorCursor (mkSurface ptr) hot_x hot_y =
+createColorCursor : Surface -> Int -> Int -> IO (Either String Cursor)
+createColorCursor (mkSurface ptr) hot_x hot_y =
     doSDLIf
         (mkForeign (FFun "idris_SDL_createColorCursor" [FPtr, FInt, FInt] FInt) ptr hot_x hot_y)
-        getCursor
+        getCursor'
 
 public
-CreateSystemCursor : SystemCursor -> IO (Either String Cursor)
-CreateSystemCursor flag =
+createSystemCursor : SystemCursor -> IO (Either String Cursor)
+createSystemCursor flag =
     doSDLIf
         (mkForeign (FFun "idris_SDL_createSystemCursor" [FBits32] FInt) (toFlag flag))
-        getCursor
+        getCursor'
 
 --fixme, will this set GetError on failure?
 public
-SetCursor : Cursor -> IO ()
-SetCursor (mkCursor ptr) =
+setCursor : Cursor -> IO ()
+setCursor (mkCursor ptr) =
     mkForeign (FFun "SDL_SetCursor" [FPtr] FUnit) ptr
 
 public
-GetCursor : IO (Either String Cursor)
-GetCursor =
+getCursor : IO (Either String Cursor)
+getCursor =
     doSDLIf
         (mkForeign (FFun "idris_SDL_getCursor" [] FInt))
-        getCursor
+        getCursor'
 
 public
-GetDefaultCursor : IO (Either String Cursor)
-GetDefaultCursor =
+getDefaultCursor : IO (Either String Cursor)
+getDefaultCursor =
     doSDLIf
         (mkForeign (FFun "SDL_GetDefaultCursor" [] FInt))
-        getCursor
+        getCursor'
 
 public
-FreeCursor : Cursor -> IO ()
-FreeCursor (mkCursor ptr) =
+freeCursor : Cursor -> IO ()
+freeCursor (mkCursor ptr) =
     mkForeign (FFun "SDL_FreeCursor" [FPtr] FUnit) ptr
 
 public
-IsCursorVisible : IO Bool
-IsCursorVisible =
+isCursorVisible : IO Bool
+isCursorVisible =
     [| fromSDLBool (mkForeign (FFun "SDL_ShowCursor" [FInt] FInt) (-1)) |]
 
 public
-ShowCursor : IO ()
-ShowCursor = do
+showCursor : IO ()
+showCursor = do
     mkForeign (FFun "SDL_ShowCursor" [FInt] FUnit) 1
 
 
 public
-HideCursor : IO ()
-HideCursor = do
+hideCursor : IO ()
+hideCursor = do
     mkForeign (FFun "SDL_ShowCursor" [FInt] FUnit) 0
 
 --skipped for now: event flags

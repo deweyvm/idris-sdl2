@@ -11,8 +11,8 @@ data Joystick = mkJoystick Ptr
 data GameController = mkGameController Ptr
 
 public
-GameControllerAddMapping : IO (Maybe String)
-GameControllerAddMapping = do
+gameControllerAddMapping : IO (Maybe String)
+gameControllerAddMapping = do
     doSDL (mkForeign (FFun "SDL_GameControllerAddMapping" [] FInt))
 
 freeSharedString : IO ()
@@ -20,54 +20,54 @@ freeSharedString = mkForeign (FFun "idris_gameController_sharedString_free" [] F
 
 
 public
-GameControllerMappingForGUID : JoystickGUID -> IO (Either String String)
-GameControllerMappingForGUID (mkJoystickGUID bits) = do
+gameControllerMappingForGUID : JoystickGUID -> IO (Either String String)
+gameControllerMappingForGUID (mkJoystickGUID bits) = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerMappingForGUID" [FBits16x8] FInt) bits)
         (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
             <$ freeSharedString)
 
 public
-GameControllerMapping : GameController -> IO (Either String String)
-GameControllerMapping (mkGameController ptr) = do
+gameControllerMapping : GameController -> IO (Either String String)
+gameControllerMapping (mkGameController ptr) = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerMapping" [FPtr] FInt) ptr)
         (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
             <$ freeSharedString)
 
 public
-IsGameController : Int -> IO Bool
-IsGameController id = do
+isGameController : Int -> IO Bool
+isGameController id = do
     [| fromSDLBool (mkForeign (FFun "SDL_IsGameController" [FInt] FInt) id) |]
 
 public
-GameControllerNameForIndex : Int -> IO (Either String String)
-GameControllerNameForIndex id = do
+gameControllerNameForIndex : Int -> IO (Either String String)
+gameControllerNameForIndex id = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerNameForIndex" [FInt] FInt) id)
         (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
             <$ freeSharedString)
 
 public
-GameControllerOpen : Int -> IO (Either String GameController)
-GameControllerOpen id = do
+gameControllerOpen : Int -> IO (Either String GameController)
+gameControllerOpen id = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerOpen" [FInt] FInt) id)
         [| mkGameController (mkForeign (FFun "idris_sharedGameController_controller" [] FPtr)) |]
 
 public
-GameControllerName : GameController -> IO String
-GameControllerName (mkGameController ptr) =
+gameControllerName : GameController -> IO String
+gameControllerName (mkGameController ptr) =
     mkForeign (FFun "SDL_GameControllerName" [FPtr] FString) ptr
 
 public
-GameControllerGetAttached : GameController -> IO Bool
-GameControllerGetAttached (mkGameController ptr) = do
+gameControllerGetAttached : GameController -> IO Bool
+gameControllerGetAttached (mkGameController ptr) = do
     [| fromSDLBool (mkForeign (FFun "SDL_GameControllerGetAttached" [FPtr] FInt) ptr) |]
 
 public
-GameControllerGetJoystick : GameController -> IO Joystick
-GameControllerGetJoystick (mkGameController ptr) = do
+gameControllerGetJoystick : GameController -> IO Joystick
+gameControllerGetJoystick (mkGameController ptr) = do
     [| mkJoystick (mkForeign (FFun "SDL_GameControllerGetJoystick" [FPtr] FPtr) ptr) |]
 
 --skipped because semantics are confusing
@@ -77,8 +77,8 @@ GameControllerGetJoystick (mkGameController ptr) = do
 --extern DECLSPEC int SDLCALL SDL_GameControllerEventState(int state);
 
 public
-GameControllerUpdate : IO ()
-GameControllerUpdate = mkForeign (FFun "SDL_GameControllerUpdate" [] FUnit)
+gameControllerUpdate : IO ()
+gameControllerUpdate = mkForeign (FFun "SDL_GameControllerUpdate" [] FUnit)
 
 data GameControllerAxis = ControllerAxisInvalid
                         | ControllerAxisLeftX
@@ -102,13 +102,13 @@ instance Enumerable GameControllerAxis where
     enumerate = [ControllerAxisInvalid, ControllerAxisLeftX, ControllerAxisLeftY, ControllerAxisRightX, ControllerAxisRightY, ControllerAxisTriggerLeft, ControllerAxisTriggerRight, ControllerAxisMax]
 
 public
-GameControllerGetAxisFromString : String -> IO (Maybe GameControllerAxis)
-GameControllerGetAxisFromString str =
+gameControllerGetAxisFromString : String -> IO (Maybe GameControllerAxis)
+gameControllerGetAxisFromString str =
     [| read (mkForeign (FFun "SDL_GameControllerGetAxisFromString" [FString] FInt) str) |]
 
 public
-GameControllerGetStringForAxis : GameControllerAxis -> IO String
-GameControllerGetStringForAxis axis =
+gameControllerGetStringForAxis : GameControllerAxis -> IO String
+gameControllerGetStringForAxis axis =
     mkForeign (FFun "SDL_GameControllerGetStringForAxis" [FInt] FString) (toFlag axis)
 
 --skipped: not sure how this struct is used
@@ -116,8 +116,8 @@ GameControllerGetStringForAxis axis =
 --SDL_GameControllerGetBindForAxis(SDL_GameController *gamecontroller,
 --                                 SDL_GameControllerAxis axis);
 public
-GameControllerGetAxis : GameController -> GameControllerAxis -> IO Int
-GameControllerGetAxis (mkGameController ptr) axis =
+gameControllerGetAxis : GameController -> GameControllerAxis -> IO Int
+gameControllerGetAxis (mkGameController ptr) axis =
     mkForeign (FFun "SDL_GameControllerGetAxis" [FPtr, FInt] FInt) ptr (toFlag axis)
 
 data GameControllerButton = ControllerButtonA
@@ -157,13 +157,13 @@ instance Enumerable GameControllerButton where
     enumerate = [ControllerButtonA, ControllerButtonB, ControllerButtonX, ControllerButtonY, ControllerButtonBack, ControllerButtonGuide, ControllerButtonStart, ControllerButtonLeftStick, ControllerButtonRightStick, ControllerButtonLeftShoulder, ControllerButtonRightShoulder, ControllerButtonDpadUp, ControllerButtonDpadDown, ControllerButtonDpadLeft, ControllerButtonDpadRight]
 
 public
-GameControllerGetButtonFromString : String -> IO (Maybe GameControllerButton)
-GameControllerGetButtonFromString str = do
+gameControllerGetButtonFromString : String -> IO (Maybe GameControllerButton)
+gameControllerGetButtonFromString str = do
     [| read (mkForeign (FFun "SDL_GameControllerGetButtonFromString" [FString] FInt) str) |]
 
 public
-GameControllerGetStringForButton : GameControllerButton -> IO String
-GameControllerGetStringForButton b =
+gameControllerGetStringForButton : GameControllerButton -> IO String
+gameControllerGetStringForButton b =
     mkForeign (FFun "SDL_GameControllerGetStringForButton" [FInt] FString) (toFlag b)
 
 --skipped: not sure how this struct is used
@@ -171,10 +171,10 @@ GameControllerGetStringForButton b =
 --SDL_GameControllerGetBindForButton(SDL_GameController *gamecontroller,
 --                                   SDL_GameControllerButton button);
 
-GameControllerGetButton : GameController -> GameControllerButton -> IO Int
-GameControllerGetButton (mkGameController ptr) c =
+gameControllerGetButton : GameController -> GameControllerButton -> IO Int
+gameControllerGetButton (mkGameController ptr) c =
     mkForeign (FFun "SDL_GameControllerGetButton" [FPtr, FInt] FInt) ptr (toFlag c)
 
-GameControllerClose : GameController -> IO ()
-GameControllerClose (mkGameController ptr) =
+gameControllerClose : GameController -> IO ()
+gameControllerClose (mkGameController ptr) =
     mkForeign (FFun "SDL_GameControllerClose" [FPtr] FUnit) ptr

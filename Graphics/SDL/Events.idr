@@ -784,8 +784,8 @@ getEvent t = case t of
 
 
 public
-PollEvent : IO (Either String (Bits32, Event))
-PollEvent =
+pollEvent : IO (Either String (Bits32, Event))
+pollEvent =
     doSDLIf
         ((\x => 1 - x) `map` (mkForeign (FFun "idris_SDL_pollEvent" [] FInt)))
         (do code <- getEventType
@@ -796,14 +796,14 @@ PollEvent =
                 [| (/*/) getTimestamp (getEvent x) |])
 
 public
-PumpEvents : IO ()
-PumpEvents = mkForeign (FFun "SDL_PumpEvents" [] FUnit)
+pumpEvents : IO ()
+pumpEvents = mkForeign (FFun "SDL_PumpEvents" [] FUnit)
 
 --int SDLCALL SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action, Uint32 minType, Uint32 maxType);
 
 public
-HasEvent : EventType -> IO Bool
-HasEvent t = do
+hasEvent : EventType -> IO Bool
+hasEvent t = do
     [| fromSDLBool (mkForeign (FFun "SDL_HasEvent" [FBits32] FInt) (toFlag t)) |]
 
 --fixme: should use some generalized filterM here
@@ -811,13 +811,13 @@ findA : (Applicative f, Traversable ls) => (a -> f Bool) -> ls a -> f Bool
 findA fun xs = (map (any id)) (sequence (map fun xs))
 
 public
-HasEvents : List EventType -> IO Bool
-HasEvents xs = findA HasEvent xs
+hasEvents : List EventType -> IO Bool
+hasEvents xs = findA hasEvent xs
 
 public
-FlushEvent : EventType -> IO ()
-FlushEvent t = mkForeign (FFun "SDL_FlushEvent" [FBits32] FUnit) (toFlag t)
+flushEvent : EventType -> IO ()
+flushEvent t = mkForeign (FFun "SDL_FlushEvent" [FBits32] FUnit) (toFlag t)
 
 public
-FlushEvents : List EventType -> IO ()
-FlushEvents xs = sequence_ (map FlushEvent xs)
+flushEvents : List EventType -> IO ()
+flushEvents xs = sequence_ (map flushEvent xs)

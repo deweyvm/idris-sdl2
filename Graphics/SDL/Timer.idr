@@ -5,19 +5,19 @@ import Graphics.SDL.Common
 %include C "SDL2/SDL_timer.h"
 
 public
-GetTicks : IO Bits32
-GetTicks = mkForeign (FFun "SDL_GetTicks" [] FBits32)
+getTicks : IO Bits32
+getTicks = mkForeign (FFun "SDL_GetTicks" [] FBits32)
 
 public
-GetPerformanceCounter : IO Bits64
-GetPerformanceCounter = mkForeign (FFun "SDL_GetPerformanceCounter" [] FBits64)
+getPerformanceCounter : IO Bits64
+getPerformanceCounter = mkForeign (FFun "SDL_GetPerformanceCounter" [] FBits64)
 
 public
-GetPerformanceFrequency : IO Bits64
-GetPerformanceFrequency = mkForeign (FFun "SDL_GetPerformanceFrequency" [] FBits64)
+getPerformanceFrequency : IO Bits64
+getPerformanceFrequency = mkForeign (FFun "SDL_GetPerformanceFrequency" [] FBits64)
 
 public
-Delay : Int -> IO ()
-Delay ms = mkForeign (FFun "SDL_Delay" [FInt] FUnit) ms
+delay : Int -> IO ()
+delay ms = mkForeign (FFun "SDL_Delay" [FInt] FUnit) ms
 
 --timers/timer callbacks not implemented. use idris's concurrency?

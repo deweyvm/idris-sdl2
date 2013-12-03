@@ -7,21 +7,21 @@ import Graphics.SDL.SDL
 %link C "idris_SDL_clipboard.o"
 
 public
-SetClipboardText : String -> IO (Maybe String)
-SetClipboardText text = do
+setClipboardText : String -> IO (Maybe String)
+setClipboardText text = do
     doSDL (mkForeign (FFun "SDL_SetClipboardText" [FString] FInt) text)
 
 public
-HasClipboardText : IO Bool
-HasClipboardText = do
+hasClipboardText : IO Bool
+hasClipboardText = do
     [| fromSDLBool (mkForeign (FFun "SDL_HasClipboardText" [] FInt)) |]
 
---this segfaults if there is no window
+--this segfaults if there is no window, even with our check
 --fixme
 public
-GetClipboardText : IO (Either String String)
-GetClipboardText = do
-    hasText <- HasClipboardText
+getClipboardText : IO (Either String String)
+getClipboardText = do
+    hasText <- hasClipboardText
     if (not hasText)
        then
          return $ Left "<empty>"

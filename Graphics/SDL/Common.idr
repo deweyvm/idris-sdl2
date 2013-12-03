@@ -50,9 +50,9 @@ toSDLBool : Bool -> Int
 toSDLBool True = 1
 toSDLBool False = 0
 
-getError : IO String
-getError = do
-    errorString <- GetError
+getError' : IO String
+getError' = do
+    errorString <- getError
     if (errorString == "")
       then return "<unknown error>"
       else return errorString
@@ -64,7 +64,7 @@ doSDL action = do
     success <- [| fromSDLBool action |]
     if (not success)
       then do
-        errorString <- getError
+        errorString <- getError'
         return $ Just errorString
       else do
         return Nothing
@@ -87,7 +87,7 @@ doSDLIf try' getter = do
     success <- [| fromSDLBool try' |]
     if (not success)
       then do
-        errorString <- GetError
+        errorString <- getError'
         return $ Left errorString
       else do
         res <- getter

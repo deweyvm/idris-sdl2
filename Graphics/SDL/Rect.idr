@@ -17,12 +17,12 @@ instance Show Rect where
                                  ]
 
 
-RectEmpty : Rect -> Bool
-RectEmpty (mkRect x y w h) = w <= 0 || h <= 0
+rectEmpty : Rect -> Bool
+rectEmpty (mkRect x y w h) = w <= 0 || h <= 0
 
 
-RectEquals : Rect -> Rect -> Bool
-RectEquals (mkRect x1 y1 w1 h1) (mkRect x2 y2 w2 h2) =
+rectEquals : Rect -> Rect -> Bool
+rectEquals (mkRect x1 y1 w1 h1) (mkRect x2 y2 w2 h2) =
     (x1 == x2) && (y1 == y2) && (w1 == w2) && (h1 == h2)
 
 

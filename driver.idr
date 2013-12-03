@@ -17,14 +17,14 @@ import Utils.Map
 
 doInit : IO ()
 doInit = do
-    init <- Init [InitEverything]
+    init <- init [InitEverything]
     case init of
         Just err => putStrLn err
         Nothing => return ()
 
 testRenderer : Renderer -> IO ()
 testRenderer renderer = do
-    info <- GetRenderDriverInfo renderer
+    info <- getRenderDriverInfo renderer
     case info of
         Right (mkRendererInfo name flags formats maxwidth maxheight) =>
             putStrLn $ join [ name
@@ -41,25 +41,25 @@ testRenderer renderer = do
 
 doWindow : IO ()
 doWindow = do
-    x <- CreateWindow "test" 600 600 600 600 [WindowShown]
+    x <- createWindow "test" 600 600 600 600 [WindowShown]
     case x of
         Left err =>
             putStr "no window"
         Right win => do
             putStrLn "what"
-            rend <- CreateRenderer win 0 [RendererAccelerated]
+            rend <- createRenderer win 0 [RendererAccelerated]
             testRenderer rend
-            RenderClear rend
-            SetRenderDrawColor rend red
-            RenderDrawLine rend (mkPoint 0 0) (mkPoint 100 100)
-            RenderPresent rend
+            renderClear rend
+            setRenderDrawColor rend red
+            renderDrawLine rend (mkPoint 0 0) (mkPoint 100 100)
+            renderPresent rend
 
 eventLoopTest : IO ()
 eventLoopTest = do
-    event <- PollEvent
+    event <- pollEvent
     case event of
         Left err => do
-            Delay 10
+            delay 10
             eventLoopTest
         Right (timestamp, event) =>
             case event of
@@ -72,15 +72,15 @@ eventLoopTest = do
 main : IO ()
 main = do
     doInit
-    i <- GetInit
+    i <- getInit
     putStrLn $ show i
     doWindow
-    SetClipboardText "clipboard2"
-    clip <- GetClipboardText
+    setClipboardText "clipboard2"
+    clip <- getClipboardText
     putStrLn $ "Clipboard: " ++ (show clip)
-    Delay 1000
+    delay 1000
 
-    num <- GetDisplayBounds 0
-    mode <- GetDisplayMode 0 0
+    num <- getDisplayBounds 0
+    mode <- getDisplayMode 0 0
     putStrLn $ show num
     putStrLn $ show mode

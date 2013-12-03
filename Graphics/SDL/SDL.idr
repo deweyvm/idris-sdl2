@@ -50,34 +50,34 @@ instance Show InitFlag where
     show InitEverything = "InitEverything"
 
 public
-Init : List InitFlag -> IO (Maybe String)
-Init flags = do
+init : List InitFlag -> IO (Maybe String)
+init flags = do
     doSDL ((\x => 1 - x) `map` (mkForeign (FFun "SDL_Init" [FBits32] FInt) (sumBits flags)))
 
 public
-InitSubSystem : List InitFlag -> IO (Maybe String)
-InitSubSystem flags = do
+initSubSystem : List InitFlag -> IO (Maybe String)
+initSubSystem flags = do
     doSDL (mkForeign (FFun "SDL_InitSubSystem" [FBits32] FInt) (sumBits flags))
 
 --for the C behavior when passing 0, use GetInit
 public
-WasInit : InitFlag -> IO Bool
-WasInit flag = do
+wasInit : InitFlag -> IO Bool
+wasInit flag = do
     bits <- mkForeign (FFun "SDL_WasInit" [FBits32] FBits32) (toFlag flag)
     return (bits == (toFlag flag))
 
 --note: does not show parachute status
 public
-GetInit : IO (List InitFlag)
-GetInit = do
+getInit : IO (List InitFlag)
+getInit = do
     initialized <- mkForeign (FFun "SDL_WasInit" [FBits32] FBits32) 0x0
     return $ bitMaskToFlags initialized
 
 public
-QuitSubSystem : List InitFlag -> IO ()
-QuitSubSystem flags = do
+quitSubSystem : List InitFlag -> IO ()
+quitSubSystem flags = do
     mkForeign (FFun "SDL_QuitSubSystem" [FBits32] FUnit) (sumBits flags)
 
 public
-Quit : IO ()
-Quit = mkForeign (FFun "SDL_Quit" [] FUnit)
+quit : IO ()
+quit = mkForeign (FFun "SDL_Quit" [] FUnit)
