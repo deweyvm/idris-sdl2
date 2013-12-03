@@ -13,6 +13,7 @@ import Graphics.SDL.CPUInfo
 import Graphics.SDL.Bits
 import Graphics.SDL.GameController
 import Graphics.SDL.Render
+import Utils.Map
 
 doInit : IO ()
 doInit = do

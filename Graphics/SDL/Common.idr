@@ -24,7 +24,7 @@ sumBits : (Flag Bits32 a) => List a -> Bits32
 sumBits flags = foldl prim__orB32 0x0 (map toFlag flags)
 
 read : (Eq a, Enumerable e, Flag a e) => a -> Maybe e
-read i = find (\x => toFlag x == i) enumerate
+read i = List.find (\x => toFlag x == i) enumerate
 
 readOrElse : (Eq a, Enumerable e, Flag a e) => e -> a -> e
 readOrElse def x = case read x of
@@ -68,6 +68,15 @@ doSDL action = do
         return $ Just errorString
       else do
         return Nothing
+
+doSDLMaybe : IO Int -> IO a -> IO (Maybe a)
+doSDLMaybe try' getter = do
+    success <- [| fromSDLBool try' |]
+    if (not success)
+      then return Nothing
+      else do
+        res <- getter
+        return $ Just res
 
 --wraps IO actions which return an action, but may fail
 --first arg is the int status return value of many SDL library functions.

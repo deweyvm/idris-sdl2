@@ -185,32 +185,6 @@ data Event = WindowEvent Bits32 Bits8 Bits8 Bits8 Bits8 Int Int
            | UserEvent Bits32 Int Ptr Ptr
            | SysWMEvent Ptr
            | UnknownEvent EventType
-public
-PumpEvents : IO ()
-PumpEvents = mkForeign (FFun "SDL_PumpEvents" [] FUnit)
-
---int SDLCALL SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action, Uint32 minType, Uint32 maxType);
-
-
-HasEvent : EventType -> IO Bool
-HasEvent t = do
-    [| fromSDLBool (mkForeign (FFun "SDL_HasEvent" [FBits32] FInt) (toFlag t)) |]
-
---fixme: should use some generalized filterM here
-findA : (Applicative f, Traversable ls) => (a -> f Bool) -> ls a -> f Bool
-findA fun xs = (map (any id)) (sequence (map fun xs))
-
-public
-HasEvents : List EventType -> IO Bool
-HasEvents xs = findA HasEvent xs
-
-public
-FlushEvent : EventType -> IO ()
-FlushEvent t = mkForeign (FFun "SDL_FlushEvent" [FBits32] FUnit) (toFlag t)
-
-public
-FlushEvents : List EventType -> IO ()
-FlushEvents xs = sequence_ (map FlushEvent xs)
 
 {- | If the code is valid, return the corresponding EventType
      Otherwise, return the raw bit value -}
@@ -821,3 +795,29 @@ PollEvent =
               Right x => do
                 [| (/*/) getTimestamp (getEvent x) |])
 
+public
+PumpEvents : IO ()
+PumpEvents = mkForeign (FFun "SDL_PumpEvents" [] FUnit)
+
+--int SDLCALL SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action, Uint32 minType, Uint32 maxType);
+
+public
+HasEvent : EventType -> IO Bool
+HasEvent t = do
+    [| fromSDLBool (mkForeign (FFun "SDL_HasEvent" [FBits32] FInt) (toFlag t)) |]
+
+--fixme: should use some generalized filterM here
+findA : (Applicative f, Traversable ls) => (a -> f Bool) -> ls a -> f Bool
+findA fun xs = (map (any id)) (sequence (map fun xs))
+
+public
+HasEvents : List EventType -> IO Bool
+HasEvents xs = findA HasEvent xs
+
+public
+FlushEvent : EventType -> IO ()
+FlushEvent t = mkForeign (FFun "SDL_FlushEvent" [FBits32] FUnit) (toFlag t)
+
+public
+FlushEvents : List EventType -> IO ()
+FlushEvents xs = sequence_ (map FlushEvent xs)

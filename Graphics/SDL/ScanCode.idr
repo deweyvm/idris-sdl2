@@ -489,3 +489,6 @@ instance Flag Bits32 ScanCode where
     toFlag Sleep              = 282
     toFlag App1               = 283
     toFlag App2               = 284
+
+numScanCodes : Bits32
+numScanCodes = foldl max 0 (map toFlag enumerate {a=ScanCode})
