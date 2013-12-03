@@ -1,4 +1,4 @@
 module Graphics.SDL.Pixels
 
 public
-data Pixels = mkPixels Ptr
+data Pixels = MkPixels Ptr

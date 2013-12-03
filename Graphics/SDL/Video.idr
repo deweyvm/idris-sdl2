@@ -11,10 +11,10 @@ import Data.Bits
 %link C "idris_SDL_video.o"
 
 --a window must never be null. We must assure through our C wrapper that a null
--- pointer is never passed to mkWindow
+-- pointer is never passed to MkWindow
 --fixme: should be abstract
 public
-data Window = mkWindow Ptr
+data Window = MkWindow Ptr
 
 instance Show Window where
     show x = "Window"
@@ -67,7 +67,7 @@ getDisplayBounds : Int -> IO (Either String Rect)
 getDisplayBounds index = do
     doSDLIf
         (checkGetDisplayBounds index)
-        [| mkRect getDisplayBounds_x
+        [| MkRect getDisplayBounds_x
                   getDisplayBounds_y
                   getDisplayBounds_w
                   getDisplayBounds_h |]
@@ -78,10 +78,10 @@ getNumDisplayModes : Int -> IO Int
 getNumDisplayModes index = mkForeign (FFun "SDL_GetNumDisplayModes" [FInt] FInt) index
 
 public
-data DisplayMode = mkDisplayMode Bits32 Int Int Int Ptr
+data DisplayMode = MkDisplayMode Bits32 Int Int Int Ptr
 
 instance Show DisplayMode where
-    show (mkDisplayMode format w h refresh_rate _) =
+    show (MkDisplayMode format w h refresh_rate _) =
         "DisplayMode " ++ (show format) ++ " " ++ (show w) ++ " " ++ (show h) ++ " " ++ show (refresh_rate)
 
 sharedDisplayMode_format : IO Bits32
@@ -110,7 +110,7 @@ checkGetDisplayMode displayIndex modeIndex =
 
 getSharedDisplayMode : IO DisplayMode
 getSharedDisplayMode = do
-    [| mkDisplayMode sharedDisplayMode_format
+    [| MkDisplayMode sharedDisplayMode_format
                      sharedDisplayMode_w
                      sharedDisplayMode_h
                      sharedDisplayMode_refresh_rate
@@ -147,14 +147,14 @@ getCurrentDisplayMode displayIndex = do
 
 public
 getClosestDisplayMode : Int -> DisplayMode -> IO (Either String DisplayMode)
-getClosestDisplayMode displayIndex (mkDisplayMode format w h hz ddata) = do
+getClosestDisplayMode displayIndex (MkDisplayMode format w h hz ddata) = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_getClosestDisplayMode" [FInt, FBits32, FInt, FInt, FInt, FPtr] FInt) displayIndex format w h hz ddata)
         (getSharedDisplayMode)
 
 public
 getWindowDisplayIndex : Window -> IO (Maybe Int)
-getWindowDisplayIndex (mkWindow ptr) = do
+getWindowDisplayIndex (MkWindow ptr) = do
     index <- mkForeign (FFun "SDL_GetWindowDisplayIndex" [FPtr] FInt) ptr
     return $ case index of
       -1 => Nothing
@@ -162,19 +162,19 @@ getWindowDisplayIndex (mkWindow ptr) = do
 
 public
 setWindowDisplayMode : Window -> DisplayMode -> IO (Maybe String)
-setWindowDisplayMode (mkWindow ptr) (mkDisplayMode format w h hz ddata) = do
+setWindowDisplayMode (MkWindow ptr) (MkDisplayMode format w h hz ddata) = do
     doSDL (mkForeign (FFun "idris_SDL_setWindowDisplayMode" [FPtr, FBits32, FInt, FInt, FInt, FPtr] FInt) ptr format w h hz ddata)
 
 public
 getWindowDisplayMode : Window -> IO (Either String DisplayMode)
-getWindowDisplayMode (mkWindow ptr) = do
+getWindowDisplayMode (MkWindow ptr) = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_getWindowDisplayMode" [FPtr] FInt) ptr)
         (getSharedDisplayMode)
 
 public
 getWindowPixelFormat : Window -> IO Bits32
-getWindowPixelFormat (mkWindow ptr) =
+getWindowPixelFormat (MkWindow ptr) =
     mkForeign (FFun "SDL_GetWindowPixelFormat" [FPtr] FBits32) ptr
 
 public
@@ -216,7 +216,7 @@ checkCreateWindow title x y w h flags =
     (mkForeign (FFun "idris_SDL_createWindow" [FString, FInt, FInt, FInt, FInt, FBits32] FInt) title x y w h (sumBits flags))
 
 getCreateWindow : IO Window
-getCreateWindow = [| mkWindow (mkForeign (FFun "idris_sharedWindow" [] FPtr)) |]
+getCreateWindow = [| MkWindow (mkForeign (FFun "idris_sharedWindow" [] FPtr)) |]
 
 public
 createWindow : String -> Int -> Int -> Int -> Int -> List WindowFlag -> IO (Either String Window)
@@ -230,12 +230,12 @@ createWindowFrom : Ptr -> IO (Either String Window)
 createWindowFrom ptr = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_createWindowFrom" [FPtr] FInt) ptr)
-        [| mkWindow (mkForeign (FFun "idris_SDL_sharedWindow" [] FPtr)) |]
+        [| MkWindow (mkForeign (FFun "idris_SDL_sharedWindow" [] FPtr)) |]
 
 --is 0 a legit return value here?
 public
 getWindowID : Window -> IO Bits32
-getWindowID (mkWindow ptr) =
+getWindowID (MkWindow ptr) =
     mkForeign (FFun "SDL_GetWindowID" [FPtr] FBits32) ptr
 
 public
@@ -243,48 +243,48 @@ getWindowFromID : Bits32 -> IO (Either String Window)
 getWindowFromID id = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_getWindowFromID" [FBits32] FInt) id)
-        [| mkWindow (mkForeign (FFun "idris_sharedWindow" [] FPtr)) |]
+        [| MkWindow (mkForeign (FFun "idris_sharedWindow" [] FPtr)) |]
 
 --this function might be pure
 --fixme return List WindowFlag somehow
 public
 getWindowFlags : Window -> IO (List WindowFlag)
-getWindowFlags (mkWindow ptr) =
+getWindowFlags (MkWindow ptr) =
     [| bitMaskToFlags (mkForeign (FFun "SDL_GetWindowFlags" [FPtr] FBits32) ptr) |]
 
 public
 setWindowTitle : Window -> String -> IO ()
-setWindowTitle (mkWindow ptr) title =
+setWindowTitle (MkWindow ptr) title =
     mkForeign (FFun "SDL_SetWindowTitle" [FPtr, FString] FUnit) ptr title
 
 --this function might be pure
 public
 getWindowTitle : Window -> IO String
-getWindowTitle (mkWindow ptr) =
+getWindowTitle (MkWindow ptr) =
     mkForeign (FFun "SDL_GetWindowTitle" [FPtr] FString) ptr
 
 --does this function indicate when failing?
 public
 setWindowIcon : Window -> Surface -> IO ()
-setWindowIcon (mkWindow win) (mkSurface surf) =
+setWindowIcon (MkWindow win) (MkSurface surf) =
     mkForeign (FFun "SDL_SetWindowIcon" [FPtr, FPtr] FUnit) win surf
 
 --can return a null pointer
 public
 setWindowData : Window -> String -> Ptr -> IO Ptr
-setWindowData (mkWindow win) name value =
+setWindowData (MkWindow win) name value =
     mkForeign (FFun "SDL_SetWindowData" [FPtr, FString, FPtr] FPtr) win name value
 
 --fixme: return Maybe Ptr instead? need to think about whether or not its valid for
 --    the user to store a null pointer in a window
 public
 getWindowData : Window -> String -> IO Ptr
-getWindowData (mkWindow win) name =
+getWindowData (MkWindow win) name =
     mkForeign (FFun "SDL_GetWindowData" [FPtr, FString] FPtr) win name
 
 public
 setWindowPosition : Window -> Int -> Int -> IO ()
-setWindowPosition (mkWindow ptr) x y =
+setWindowPosition (MkWindow ptr) x y =
     mkForeign (FFun "SDL_SetWindowPosition" [FPtr, FInt, FInt] FUnit) ptr x y
 
 getSharedX : IO Int
@@ -295,118 +295,118 @@ getSharedY = mkForeign (FFun "idris_shared_y" [] FInt)
 
 public
 getWindowPosition : Window -> IO (Int, Int)
-getWindowPosition (mkWindow ptr) = do
+getWindowPosition (MkWindow ptr) = do
     mkForeign (FFun "idris_SDL_getWindowPosition" [FPtr] FUnit) ptr
     [| (/*/) getSharedX getSharedY |]
 
 public
 setWindowSize : Window -> Int -> Int -> IO ()
-setWindowSize (mkWindow ptr) x y =
+setWindowSize (MkWindow ptr) x y =
     mkForeign (FFun "SDL_SetWindowSize" [FPtr, FInt, FInt] FUnit) ptr x y
 
 public
 getWindowSize : Window -> IO (Int, Int)
-getWindowSize (mkWindow ptr) = do
+getWindowSize (MkWindow ptr) = do
     mkForeign (FFun "idris_SDL_getWindowSize" [FPtr] FUnit) ptr
     [| (/*/) getSharedX getSharedY |]
 
 public
 setWindowMinimumSize : Window -> Int -> Int -> IO ()
-setWindowMinimumSize (mkWindow ptr) x y =
+setWindowMinimumSize (MkWindow ptr) x y =
     mkForeign (FFun "SDL_SetWindowMinimumSize" [FPtr, FInt, FInt] FUnit) ptr x y
 
 public
 getWindowMinimumSize : Window -> IO (Int, Int)
-getWindowMinimumSize (mkWindow ptr) = do
+getWindowMinimumSize (MkWindow ptr) = do
     mkForeign (FFun "idris_SDL_getWindowMinimumSize" [FPtr] FUnit) ptr
     [| (/*/) getSharedX getSharedY |]
 
 public
 setWindowMaximumSize : Window -> Int -> Int -> IO ()
-setWindowMaximumSize (mkWindow ptr) x y =
+setWindowMaximumSize (MkWindow ptr) x y =
     mkForeign (FFun "SDL_SetWindowMaximumSize" [FPtr, FInt, FInt] FUnit) ptr x y
 
 public
 getWindowMaximumSize : Window -> IO (Int, Int)
-getWindowMaximumSize (mkWindow ptr) = do
+getWindowMaximumSize (MkWindow ptr) = do
     mkForeign (FFun "idris_SDL_getWindowMaximumSize" [FPtr] FUnit) ptr
     [| (/*/) getSharedX getSharedY |]
 
 public
 setWindowBordered : Window -> Bool -> IO ()
-setWindowBordered (mkWindow ptr) bordered =
+setWindowBordered (MkWindow ptr) bordered =
     mkForeign (FFun "SDL_SetWindowBordered" [FPtr, FInt] FUnit) ptr (toSDLBool bordered)
 
 public
 showWindow : Window -> IO ()
-showWindow (mkWindow ptr) =
+showWindow (MkWindow ptr) =
     mkForeign (FFun "SDL_ShowWindow" [FPtr] FUnit) ptr
 
 public
 hideWindow : Window -> IO ()
-hideWindow (mkWindow ptr) =
+hideWindow (MkWindow ptr) =
     mkForeign (FFun "SDL_HideWindow" [FPtr] FUnit) ptr
 
 public
 raiseWindow : Window -> IO ()
-raiseWindow (mkWindow ptr) =
+raiseWindow (MkWindow ptr) =
     mkForeign (FFun "SDL_RaiseWindow" [FPtr] FUnit) ptr
 
 public
 maximizeWindow : Window -> IO ()
-maximizeWindow (mkWindow ptr) =
+maximizeWindow (MkWindow ptr) =
     mkForeign (FFun "SDL_MaximizeWindow" [FPtr] FUnit) ptr
 
 public
 minimizeWindow : Window -> IO ()
-minimizeWindow (mkWindow ptr) =
+minimizeWindow (MkWindow ptr) =
     mkForeign (FFun "SDL_MinimizeWindow" [FPtr] FUnit) ptr
 
 public
 restoreWindow : Window -> IO ()
-restoreWindow (mkWindow ptr) =
+restoreWindow (MkWindow ptr) =
     mkForeign (FFun "SDL_RestoreWindow" [FPtr] FUnit) ptr
 
 public
 setWindowFullscreen : Window -> Bits32 -> IO (Maybe String)
-setWindowFullscreen (mkWindow ptr) flags = do
+setWindowFullscreen (MkWindow ptr) flags = do
     doSDL (mkForeign (FFun "SDL_SetWindowFullscreen" [FPtr, FBits32] FInt) ptr flags)
 
 public
 getWindowSurface : Window -> IO (Either String Surface)
-getWindowSurface (mkWindow ptr) = do
+getWindowSurface (MkWindow ptr) = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_getWindowSurface" [FPtr] FInt) ptr)
-        [| mkSurface (mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FPtr)) |]
+        [| MkSurface (mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FPtr)) |]
 
 public
 updateWindowSurface : Window -> IO (Maybe String)
-updateWindowSurface (mkWindow ptr) = do
+updateWindowSurface (MkWindow ptr) = do
     doSDL (mkForeign (FFun "idris_SDL_getWindowSurface_surface" [] FInt))
 
 public
 setWindowGrab : Window -> Bool -> IO ()
-setWindowGrab (mkWindow ptr) grabbed =
+setWindowGrab (MkWindow ptr) grabbed =
     mkForeign (FFun "SDL_SetWindowGrab" [FPtr, FInt] FUnit) ptr (toSDLBool grabbed)
 
 public
 getWindowGrab : Window -> IO Bool
-getWindowGrab (mkWindow ptr) = do
+getWindowGrab (MkWindow ptr) = do
     [| fromSDLBool (mkForeign (FFun "SDL_GetWindowGrab" [FPtr] FInt) ptr) |]
 
 public
 setWindowBrightness : Window -> Float -> IO (Maybe String)
-setWindowBrightness (mkWindow ptr) brightness = do
+setWindowBrightness (MkWindow ptr) brightness = do
     doSDL (mkForeign (FFun "SDL_SetWindowBrightness" [FPtr, FFloat] FInt) ptr brightness)
 
 public
 getWindowBrightness : Window -> IO Float
-getWindowBrightness (mkWindow ptr) =
+getWindowBrightness (MkWindow ptr) =
     mkForeign (FFun "SDL_GetWindowBrightness" [FPtr] FFloat) ptr
 
 public
 destroyWindow : Window -> IO ()
-destroyWindow (mkWindow ptr) =
+destroyWindow (MkWindow ptr) =
     mkForeign (FFun "SDL_DestroyWindow" [FPtr] FUnit) ptr
 
 public

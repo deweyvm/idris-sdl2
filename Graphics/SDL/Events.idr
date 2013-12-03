@@ -263,7 +263,7 @@ getKeyboardEvent_keysym_mod =
 
 getKeyboardEvent_keysym : IO KeySym
 getKeyboardEvent_keysym =
-    [| mkKeySym getKeyboardEvent_keysym_scancode
+    [| MkKeySym getKeyboardEvent_keysym_scancode
                 getKeyboardEvent_keysym_sym
                 getKeyboardEvent_keysym_mod |]
 

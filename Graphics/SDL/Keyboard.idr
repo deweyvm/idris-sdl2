@@ -11,7 +11,7 @@ import Utils.Map
 
 
 public
-data KeySym = mkKeySym ScanCode KeyCode (List KeyMod)
+data KeySym = MkKeySym ScanCode KeyCode (List KeyMod)
 
 
 
@@ -20,7 +20,7 @@ getKeyboardFocus : IO (Maybe Window)
 getKeyboardFocus =
     doSDLMaybe
         (mkForeign (FFun "idris_SDL_getKeyboardFocus" [] FInt))
-        [| mkWindow (mkForeign (FFun "idris_SDL_getKeyboardFocus_window" [] FPtr)) |]
+        [| MkWindow (mkForeign (FFun "idris_SDL_getKeyboardFocus_window" [] FPtr)) |]
 
 public
 getKeyboardState : IO (Either String (List Bool))
@@ -89,7 +89,7 @@ stopTextInput = mkForeign (FFun "SDL_StopTextInput" [] FUnit)
 
 public
 setTextInputRect : Rect -> IO ()
-setTextInputRect (mkRect x y w h) =
+setTextInputRect (MkRect x y w h) =
     mkForeign (FFun "idris_SDL_setTextInputRect" [FInt, FInt, FInt, FInt] FUnit) x y w h
 
 public
@@ -99,5 +99,5 @@ hasScreenKeyboardSupport =
 
 public
 isScreenKeyboardShown : Window -> IO Bool
-isScreenKeyboardShown (mkWindow win) =
+isScreenKeyboardShown (MkWindow win) =
     [| fromSDLBool (mkForeign (FFun "SDL_IsScreenKeyboardShown" [FPtr] FInt) win) |]

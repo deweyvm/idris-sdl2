@@ -10,17 +10,17 @@ import Graphics.SDL.Pixels
 %link C "idris_SDL_render.o"
 
 public
-data Renderer = mkRenderer Ptr
+data Renderer = MkRenderer Ptr
 
 public
-data Texture = mkTexture Ptr
+data Texture = MkTexture Ptr
 
 public
-data Color = mkColor Bits8 Bits8 Bits8 Bits8
+data Color = MkColor Bits8 Bits8 Bits8 Bits8
 
 public
 red : Color
-red = mkColor 0xFF 0xFF 0xFF 0xFF
+red = MkColor 0xFF 0xFF 0xFF 0xFF
 
 public
 data RendererFlag = RendererSoftware
@@ -44,7 +44,7 @@ instance Enumerable RendererFlag where
     enumerate = [RendererSoftware, RendererAccelerated, RendererPresentVSync, RendererTargetTexture]
 
 public
-data RendererInfo = mkRendererInfo String (List RendererFlag) (List Bits32) Int Int
+data RendererInfo = MkRendererInfo String (List RendererFlag) (List Bits32) Int Int
 
 public
 getNumRenderDrivers : IO Int
@@ -52,11 +52,11 @@ getNumRenderDrivers = mkForeign (FFun "SDL_GetNumRenderDrivers" [] FInt)
 
 getSharedWindow : IO Window
 getSharedWindow = do
-    [| mkWindow (mkForeign (FFun "idris_sharedWindow_window" [] FPtr)) |]
+    [| MkWindow (mkForeign (FFun "idris_sharedWindow_window" [] FPtr)) |]
 
 getSharedRenderer : IO Renderer
 getSharedRenderer =
-    [| mkRenderer (mkForeign (FFun "idris_sharedRenderer_renderer" [] FPtr)) |]
+    [| MkRenderer (mkForeign (FFun "idris_sharedRenderer_renderer" [] FPtr)) |]
 
 public
 createWindowAndRenderer : Int -> Int -> List WindowFlag -> IO (Either String (Window, Renderer))
@@ -67,19 +67,19 @@ createWindowAndRenderer w h flags =
 
 public
 createRenderer : Window -> Int -> List RendererFlag -> IO Renderer
-createRenderer (mkWindow win) index flags =
-    [| mkRenderer (mkForeign (FFun "SDL_CreateRenderer" [FPtr, FInt, FBits32] FPtr) win index (sumBits flags)) |]
+createRenderer (MkWindow win) index flags =
+    [| MkRenderer (mkForeign (FFun "SDL_CreateRenderer" [FPtr, FInt, FBits32] FPtr) win index (sumBits flags)) |]
 
 public
 createSoftwareRenderer : Surface -> IO (Either String Renderer)
-createSoftwareRenderer (mkSurface surf) =
+createSoftwareRenderer (MkSurface surf) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_createSoftwareRenderer" [FPtr] FInt) surf)
         getSharedRenderer
 
 public
 getRenderer : Window -> IO (Either String Renderer)
-getRenderer (mkWindow win) =
+getRenderer (MkWindow win) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_getRenderer" [FPtr] FInt) win)
         getSharedRenderer
@@ -102,11 +102,11 @@ getRendererInfo_info = do
     formats <- getTextureFormats
     width <- mkForeign (FFun "idris_rendererInfo_max_texture_width" [] FInt)
     height <- mkForeign (FFun "idris_rendererInfo_max_texture_height" [] FInt)
-    return (mkRendererInfo name flags formats width height)
+    return (MkRendererInfo name flags formats width height)
 
 public
 getRenderDriverInfo : Renderer -> IO (Either String RendererInfo)
-getRenderDriverInfo (mkRenderer ren) = do
+getRenderDriverInfo (MkRenderer ren) = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_getRendererInfo" [FPtr] FInt) ren)
         getRendererInfo_info
@@ -119,7 +119,7 @@ getHeight = mkForeign (FFun "idris_sharedHeight_int" [] FInt)
 
 public
 getRendererOutputSize : Renderer -> IO (Either String (Int, Int))
-getRendererOutputSize (mkRenderer ren) =
+getRendererOutputSize (MkRenderer ren) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_getRendererOutputSize" [FPtr] FInt) ren)
         [| (/*/) getWidth getHeight |]
@@ -137,24 +137,24 @@ instance Enumerable TextureAccess where
     enumerate = [TextureAccessStatic, TextureAccessStreaming, TextureAccessTarget]
 
 getTexture : IO Texture
-getTexture = [| mkTexture (mkForeign (FFun "idris_sharedTexture_texture" [] FPtr)) |]
+getTexture = [| MkTexture (mkForeign (FFun "idris_sharedTexture_texture" [] FPtr)) |]
 
 public
 createTexture : Renderer -> Bits32 -> TextureAccess -> Int -> Int -> IO (Either String Texture)
-createTexture (mkRenderer ren) format access w h =
+createTexture (MkRenderer ren) format access w h =
     doSDLIf
         (mkForeign (FFun "idris_SDL_createTexture" [FPtr, FBits32, FInt, FInt, FInt] FInt) ren format (toFlag access) w h)
         getTexture
 
 public
 createTextureFromSurface : Renderer -> Surface -> IO (Either String Texture)
-createTextureFromSurface (mkRenderer ren) (mkSurface surf) =
+createTextureFromSurface (MkRenderer ren) (MkSurface surf) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_createTextureFromSurface" [FPtr, FPtr] FInt) ren surf)
         getTexture
 
 public
-data TextureInfo = mkTextureInfo Bits32 (Maybe TextureAccess) Int Int
+data TextureInfo = MkTextureInfo Bits32 (Maybe TextureAccess) Int Int
 
 getTextureAccess : IO Int
 getTextureAccess = mkForeign (FFun "idris_getSharedFormat_int" [] FInt)
@@ -164,10 +164,10 @@ getFormat = mkForeign (FFun "idris_getSharedAccess_int" [] FBits32)
 
 public
 queryTexture : Texture -> IO (Either String TextureInfo)
-queryTexture (mkTexture txt) =
+queryTexture (MkTexture txt) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_queryTexture" [FPtr] FInt) txt)
-        [| mkTextureInfo getFormat
+        [| MkTextureInfo getFormat
                          (read `map` getTextureAccess)
                          getWidth
                          getHeight |]
@@ -175,7 +175,7 @@ queryTexture (mkTexture txt) =
 -- | alpha is ignored
 public
 setTextureColorMod : Texture -> Color -> IO (Maybe String)
-setTextureColorMod (mkTexture txt) (mkColor r g b _) =
+setTextureColorMod (MkTexture txt) (MkColor r g b _) =
     doSDL (mkForeign (FFun "SetTextureColorMod" [FPtr, FBits8, FBits8, FBits8] FInt) txt r g b)
 
 --int SDLCALL SDL_GetTextureColorMod(SDL_Texture * texture, Uint8 * r, Uint8 * g, Uint8 * b);
@@ -192,17 +192,17 @@ getBlue = mkForeign (FFun "idris_getBlue_uint8" [] FBits8)
 -- | alpha will be set to 1 always. to get alpha use GetTextureAlphaMod
 public
 getTextureColorMod : Texture -> IO (Either String Color)
-getTextureColorMod (mkTexture txt) =
+getTextureColorMod (MkTexture txt) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_getTextureColorMod" [FPtr] FInt) txt)
-        [| mkColor getRed
+        [| MkColor getRed
                    getGreen
                    getBlue
                    (return 0xFF) |]
 
 public
 setTextureAlphaMod : Texture -> Bits8 -> IO (Maybe String)
-setTextureAlphaMod (mkTexture txt) a =
+setTextureAlphaMod (MkTexture txt) a =
     doSDL (mkForeign (FFun "SDL_SetTextureAlphaMod" [FPtr, FBits8] FInt) txt a)
 
 getAlpha : IO Bits8
@@ -210,14 +210,14 @@ getAlpha = mkForeign (FFun "idris_getAlpha_uint8" [] FBits8)
 
 public
 getTextureAlphaMod : Texture -> IO (Either String Bits8)
-getTextureAlphaMod (mkTexture txt) =
+getTextureAlphaMod (MkTexture txt) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_getTextureAlphaMod" [FPtr] FInt) txt)
         getAlpha
 
 public
 setTextureBlendMode : Texture -> BlendMode -> IO (Maybe String)
-setTextureBlendMode (mkTexture txt) mode =
+setTextureBlendMode (MkTexture txt) mode =
     doSDL (mkForeign (FFun "SDL_SetTextureBlendMode" [FPtr, FBits32] FInt) txt (toFlag mode))
 
 --fixme, display flag and type of flag
@@ -227,19 +227,19 @@ extractFlag f e = e >>= ((maybeToEither ("Unable to read flag")) . f)
 
 public
 getTextureBlendMode : Texture -> IO (Either String BlendMode)
-getTextureBlendMode (mkTexture txt) =
+getTextureBlendMode (MkTexture txt) =
     (extractFlag read) `map` (doSDLIf
         (mkForeign (FFun "idris_SDL_getTextureBlendMode" [FPtr] FInt) txt)
         (mkForeign (FFun "idris_getBlendMode_mode" [] FBits32)))
 
 public
 updateTexture : Texture -> Rect -> Pixels -> Int -> IO (Maybe String)
-updateTexture (mkTexture txt) (mkRect x y w h) (mkPixels pix) pitch =
+updateTexture (MkTexture txt) (MkRect x y w h) (MkPixels pix) pitch =
     doSDL (mkForeign (FFun "SDL_UpdateTexture" [FPtr, FInt, FInt, FInt, FInt, FPtr, FInt] FInt) txt x y w h pix pitch)
 
 getPixels : IO Pixels
 getPixels =
-    [| mkPixels (mkForeign (FFun "idris_getPixels" [] FPtr)) |]
+    [| MkPixels (mkForeign (FFun "idris_getPixels" [] FPtr)) |]
 
 getPitch : IO Int
 getPitch =
@@ -247,7 +247,7 @@ getPitch =
 
 public
 lockTexture : Texture -> Rect -> IO (Either String (Pixels, Int))
-lockTexture (mkTexture txt) (mkRect x y w h) =
+lockTexture (MkTexture txt) (MkRect x y w h) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_lockTexture" [FPtr, FInt, FInt, FInt, FInt] FInt) txt x y w h)
         [| (/*/) getPixels getPitch |]
@@ -255,41 +255,41 @@ lockTexture (mkTexture txt) (mkRect x y w h) =
 
 public
 unlockTexture : Texture -> IO ()
-unlockTexture (mkTexture txt) = mkForeign (FFun "SDL_UnlockTexture" [FPtr] FUnit) txt
+unlockTexture (MkTexture txt) = mkForeign (FFun "SDL_UnlockTexture" [FPtr] FUnit) txt
 
 public
 renderTargetSupported : Renderer -> IO Bool
-renderTargetSupported (mkRenderer ren) =
+renderTargetSupported (MkRenderer ren) =
     [| fromSDLBool (mkForeign (FFun "SDL_RenderTargetSupported" [FPtr] FInt) ren) |]
 
 public
 setRenderTarget : Renderer -> Texture -> IO (Maybe String)
-setRenderTarget (mkRenderer ren) (mkTexture txt) =
+setRenderTarget (MkRenderer ren) (MkTexture txt) =
     doSDL (mkForeign (FFun "SDL_SetRenderTarget" [FPtr, FPtr] FInt) ren txt)
 
 public
 getRenderTarget : Renderer -> IO (Either String Texture)
-getRenderTarget (mkRenderer ren) =
+getRenderTarget (MkRenderer ren) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_getRenderTarget" [FPtr] FInt) ren)
-        [| mkTexture (mkForeign (FFun "idris_sharedTexture" [] FPtr)) |]
+        [| MkTexture (mkForeign (FFun "idris_sharedTexture" [] FPtr)) |]
 
 public
 renderLogicalSize : Renderer -> Int -> Int -> IO (Maybe String)
-renderLogicalSize (mkRenderer ren) w h =
+renderLogicalSize (MkRenderer ren) w h =
     doSDL (mkForeign (FFun "SDL_RenderLogicalSize" [FPtr, FInt, FInt] FInt) ren w h)
 
 --fixme, cannot fail
 public
 renderGetLogicalSize : Renderer -> IO (Either String (Int, Int))
-renderGetLogicalSize (mkRenderer ren) =
+renderGetLogicalSize (MkRenderer ren) =
     doSDLIf
         ((mkForeign (FFun "idris_SDL_renderGetLogicalSize" [FPtr] FUnit) ren) $> return 1)
         [| (/*/) getWidth getHeight |]
 
 public
 renderSetViewport : Renderer -> Rect -> IO (Maybe String)
-renderSetViewport (mkRenderer ren) (mkRect x y w h) =
+renderSetViewport (MkRenderer ren) (MkRect x y w h) =
     doSDL (mkForeign (FFun "idris_SDL_renderSetViewport" [FPtr, FInt, FInt, FInt, FInt] FInt) ren x y w h)
 
 getX : IO Int
@@ -299,7 +299,7 @@ getY : IO Int
 getY = mkForeign (FFun "idris_render_sharedY_int" [] FInt)
 
 getRect : IO Rect
-getRect = [| mkRect getX
+getRect = [| MkRect getX
                     getY
                     getWidth
                     getHeight |]
@@ -307,7 +307,7 @@ getRect = [| mkRect getX
 --fixme, cannot fail
 public
 renderGetViewport : Renderer -> IO (Either String Rect)
-renderGetViewport (mkRenderer ren) =
+renderGetViewport (MkRenderer ren) =
     doSDLIf
         ((mkForeign (FFun "idris_SDL_renderGetViewport" [FPtr] FUnit) ren) $> return 1)
         getRect
@@ -315,52 +315,52 @@ renderGetViewport (mkRenderer ren) =
 public
 --int SDLCALL SDL_RenderSetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
 renderSetClipRect : Renderer -> Rect -> IO (Maybe String)
-renderSetClipRect (mkRenderer ren) (mkRect x y w h) =
+renderSetClipRect (MkRenderer ren) (MkRect x y w h) =
     doSDL (mkForeign (FFun "idris_SDL_renderSetClipRect" [FPtr, FInt, FInt, FInt, FInt] FInt) ren x y w h)
 
 --fixme, cannot fail
 public
 renderGetClipRect: Renderer -> IO (Either String Rect)
-renderGetClipRect (mkRenderer ren) =
+renderGetClipRect (MkRenderer ren) =
     doSDLIf
         ((mkForeign (FFun "SDL_RenderGetClipRect" [FPtr] FUnit) ren) $> return 1)
         getRect
 
 public
 renderSetScale : Renderer -> Int -> Int -> IO (Maybe String)
-renderSetScale (mkRenderer ren) scaleX scaleY =
+renderSetScale (MkRenderer ren) scaleX scaleY =
     doSDL (mkForeign (FFun "SDL_RenderSetScale" [FPtr, FInt, FInt] FInt) ren scaleY scaleY)
 
 public
 renderGetScale : Renderer -> IO (Either String (Int, Int))
-renderGetScale (mkRenderer ren) =
+renderGetScale (MkRenderer ren) =
     doSDLIf
         ((mkForeign (FFun "idris_SDL_renderGetScale" [FPtr] FUnit) ren) $> return 1)
         [| (/*/) getX getY |]
 
 public
 setRenderDrawColor : Renderer -> Color -> IO (Maybe String)
-setRenderDrawColor (mkRenderer ren) (mkColor r g b a) =
+setRenderDrawColor (MkRenderer ren) (MkColor r g b a) =
    doSDL (mkForeign (FFun "SDL_SetRenderDrawColor" [FPtr, FBits8, FBits8, FBits8, FBits8] FInt) ren r g b a)
 
 public
 getRenderDrawColor : Renderer -> IO (Either String Color)
-getRenderDrawColor (mkRenderer ren) =
+getRenderDrawColor (MkRenderer ren) =
     doSDLIf
         (mkForeign (FFun "idris_SDL_getRenderDrawColor" [FPtr] FInt) ren)
-        [| mkColor getRed
+        [| MkColor getRed
                    getGreen
                    getBlue
                    getAlpha |]
 
 public
 setRenderDrawBlendMode : Renderer -> BlendMode -> IO (Maybe String)
-setRenderDrawBlendMode (mkRenderer ren) mode =
+setRenderDrawBlendMode (MkRenderer ren) mode =
     doSDL (mkForeign (FFun "SDL_SetRenderDrawBlendMode" [FPtr, FBits32] FInt) ren (toFlag mode))
 
 public
 getRenderDrawBlendMode : Renderer -> IO (Either String BlendMode)
-getRenderDrawBlendMode (mkRenderer ren) =
+getRenderDrawBlendMode (MkRenderer ren) =
     (extractFlag read) `map` doSDLIf
         (mkForeign (FFun "idris_SDL_getRenderDrawBlendMode" [FPtr] FInt) ren)
         (mkForeign (FFun "idris_getBlendMode_mode" [] FBits32))
@@ -368,12 +368,12 @@ getRenderDrawBlendMode (mkRenderer ren) =
 --extern DECLSPEC int SDLCALL SDL_RenderClear(SDL_Renderer * renderer);
 public
 renderClear : Renderer -> IO (Maybe String)
-renderClear (mkRenderer ren) =
+renderClear (MkRenderer ren) =
     doSDL (mkForeign (FFun "SDL_RenderClear" [FPtr] FInt) ren)
 
 public
 renderDrawPoint : Renderer -> Point -> IO (Maybe String)
-renderDrawPoint (mkRenderer ren) (mkPoint x y) =
+renderDrawPoint (MkRenderer ren) (MkPoint x y) =
     doSDL (mkForeign (FFun "SDL_RenderDrawPoint" [FPtr, FInt, FInt] FInt) ren x y)
 
 --fixme, use the array version and return an error properly
@@ -384,7 +384,7 @@ renderDrawPoints ren [] = return Nothing
 
 public
 renderDrawLine : Renderer -> Point -> Point -> IO (Maybe String)
-renderDrawLine (mkRenderer ren) (mkPoint x1 y1) (mkPoint x2 y2) =
+renderDrawLine (MkRenderer ren) (MkPoint x1 y1) (MkPoint x2 y2) =
     doSDL (mkForeign (FFun "SDL_RenderDrawLine" [FPtr, FInt, FInt, FInt, FInt] FInt) ren x1 y1 x2 y2)
 
 public total
@@ -395,7 +395,7 @@ renderDrawLines ren [] = return Nothing
 
 public
 renderDrawRect : Renderer -> Rect -> IO (Maybe String)
-renderDrawRect (mkRenderer ren) (mkRect x y w h) =
+renderDrawRect (MkRenderer ren) (MkRect x y w h) =
     doSDL (mkForeign (FFun "idris_SDL_renderDrawRect" [FPtr, FInt, FInt, FInt, FInt] FInt) ren x y w h)
 
 public total
@@ -406,7 +406,7 @@ renderDrawRects ren (x::xs) = renderDrawRect ren x <$ renderDrawRects ren xs
 
 public
 renderFillRect : Renderer -> Rect -> IO (Maybe String)
-renderFillRect (mkRenderer ren) (mkRect x y w h) =
+renderFillRect (MkRenderer ren) (MkRect x y w h) =
     doSDL (mkForeign (FFun "idris_SDL_renderFillRect" [FPtr, FInt, FInt, FInt, FInt] FInt) ren x y w h)
 
 public total
@@ -416,7 +416,7 @@ renderFillRects ren (x::xs) = renderFillRect ren x <$ renderFillRects ren xs
 
 public
 renderCopy : Renderer -> Texture -> Rect -> Rect -> IO (Maybe String)
-renderCopy (mkRenderer ren) (mkTexture txt) (mkRect sx sy sw sh) (mkRect dx dy dw dh) =
+renderCopy (MkRenderer ren) (MkTexture txt) (MkRect sx sy sw sh) (MkRect dx dy dw dh) =
     doSDL (mkForeign (FFun "idris_SDL_renderCopy" [FPtr, FPtr, FInt, FInt, FInt, FInt, FInt, FInt, FInt, FInt] FInt) ren txt sx sy sw sh dx dy dw dh)
 
 public
@@ -431,7 +431,7 @@ instance Flag Bits32 RendererFlip where
 
 public
 renderCopyEx : Renderer -> Texture -> Rect -> Rect -> Float -> Point -> RendererFlip -> IO (Maybe String)
-renderCopyEx (mkRenderer ren) (mkTexture txt) (mkRect sx sy sw sh) (mkRect dx dy dw dh) angle (mkPoint cx cy) flip =
+renderCopyEx (MkRenderer ren) (MkTexture txt) (MkRect sx sy sw sh) (MkRect dx dy dw dh) angle (MkPoint cx cy) flip =
     doSDL (mkForeign (FFun "idris_SDL_renderCopyEX" [FPtr, FPtr,
                                                       FInt, FInt, FInt, FInt,
                                                       FInt, FInt, FInt, FInt,
@@ -440,24 +440,24 @@ renderCopyEx (mkRenderer ren) (mkTexture txt) (mkRect sx sy sw sh) (mkRect dx dy
 
 public
 renderReadPixels : Renderer -> Rect -> {-PixelFormat-}Bits32 -> Int -> IO (Either String Pixels)
-renderReadPixels (mkRenderer ren) (mkRect x y w h) format pitch =
+renderReadPixels (MkRenderer ren) (MkRect x y w h) format pitch =
     doSDLIf
         (mkForeign (FFun "idris_SDL_renderReadPixels" [FPtr, FInt, FInt, FInt, FInt, FBits32, FInt] FInt) ren x y w h format pitch)
-        [| mkPixels (mkForeign (FFun "idris_getSharedPixels" [] FPtr)) |]
+        [| MkPixels (mkForeign (FFun "idris_getSharedPixels" [] FPtr)) |]
 
 public
 renderPresent : Renderer -> IO ()
-renderPresent (mkRenderer ren) =
+renderPresent (MkRenderer ren) =
     mkForeign (FFun "SDL_RenderPresent" [FPtr] FUnit) ren
 
 public
 destroyTexture : Texture -> IO ()
-destroyTexture (mkTexture txt) =
+destroyTexture (MkTexture txt) =
     mkForeign (FFun "SDL_DestroyTexture" [FPtr] FUnit) txt
 
 public
 destroyRenderer : Renderer -> IO ()
-destroyRenderer (mkRenderer ren) =
+destroyRenderer (MkRenderer ren) =
     mkForeign (FFun "SDL_DestroyRenderer" [FPtr] FUnit) ren
 
 --skipped OGL functions

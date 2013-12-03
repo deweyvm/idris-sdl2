@@ -26,7 +26,7 @@ testRenderer : Renderer -> IO ()
 testRenderer renderer = do
     info <- getRenderDriverInfo renderer
     case info of
-        Right (mkRendererInfo name flags formats maxwidth maxheight) =>
+        Right (MkRendererInfo name flags formats maxwidth maxheight) =>
             putStrLn $ join [ name
                             , " "
                             , show flags
@@ -51,7 +51,7 @@ doWindow = do
             testRenderer rend
             renderClear rend
             setRenderDrawColor rend red
-            renderDrawLine rend (mkPoint 0 0) (mkPoint 100 100)
+            renderDrawLine rend (MkPoint 0 0) (MkPoint 100 100)
             renderPresent rend
 
 eventLoopTest : IO ()

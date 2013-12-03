@@ -6,7 +6,7 @@ import Graphics.SDL.Rect
 %include C "SDL2/SDL_surface.h"
 
 public
-data Surface = mkSurface Ptr
+data Surface = MkSurface Ptr
 
 public
 data SurfaceFlag = SWSurface
@@ -32,6 +32,6 @@ instance Flag Bits32 SurfaceFlag where
 
 public
 blitSurface : Surface -> Rect -> Surface -> Rect -> IO (Maybe String)
-blitSurface (mkSurface src) (mkRect sx sy sw sh) (mkSurface dst) (mkRect dx dy dw dh) =
+blitSurface (MkSurface src) (MkRect sx sy sw sh) (MkSurface dst) (MkRect dx dy dw dh) =
     doSDL (mkForeign (FFun "SDL_BlitSurface" [FPtr, FInt, FInt, FInt, FInt, FPtr, FInt, FInt, FInt, FInt] FInt) src sx sy sw sh dst dx dy dw dh)
 

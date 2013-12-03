@@ -6,9 +6,9 @@ import Graphics.SDL.Common
 %include C "csrc/idris_SDL_gamecontroller.h"
 %link C "idris_SDL_gamecontroller.o"
 
-data JoystickGUID = mkJoystickGUID Bits16x8
-data Joystick = mkJoystick Ptr
-data GameController = mkGameController Ptr
+data JoystickGUID = MkJoystickGUID Bits16x8
+data Joystick = MkJoystick Ptr
+data GameController = MkGameController Ptr
 
 public
 gameControllerAddMapping : IO (Maybe String)
@@ -21,7 +21,7 @@ freeSharedString = mkForeign (FFun "idris_gameController_sharedString_free" [] F
 
 public
 gameControllerMappingForGUID : JoystickGUID -> IO (Either String String)
-gameControllerMappingForGUID (mkJoystickGUID bits) = do
+gameControllerMappingForGUID (MkJoystickGUID bits) = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerMappingForGUID" [FBits16x8] FInt) bits)
         (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
@@ -29,7 +29,7 @@ gameControllerMappingForGUID (mkJoystickGUID bits) = do
 
 public
 gameControllerMapping : GameController -> IO (Either String String)
-gameControllerMapping (mkGameController ptr) = do
+gameControllerMapping (MkGameController ptr) = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerMapping" [FPtr] FInt) ptr)
         (mkForeign (FFun "idris_gameController_sharedString_string" [] FString)
@@ -53,22 +53,22 @@ gameControllerOpen : Int -> IO (Either String GameController)
 gameControllerOpen id = do
     doSDLIf
         (mkForeign (FFun "idris_SDL_gameControllerOpen" [FInt] FInt) id)
-        [| mkGameController (mkForeign (FFun "idris_sharedGameController_controller" [] FPtr)) |]
+        [| MkGameController (mkForeign (FFun "idris_sharedGameController_controller" [] FPtr)) |]
 
 public
 gameControllerName : GameController -> IO String
-gameControllerName (mkGameController ptr) =
+gameControllerName (MkGameController ptr) =
     mkForeign (FFun "SDL_GameControllerName" [FPtr] FString) ptr
 
 public
 gameControllerGetAttached : GameController -> IO Bool
-gameControllerGetAttached (mkGameController ptr) = do
+gameControllerGetAttached (MkGameController ptr) = do
     [| fromSDLBool (mkForeign (FFun "SDL_GameControllerGetAttached" [FPtr] FInt) ptr) |]
 
 public
 gameControllerGetJoystick : GameController -> IO Joystick
-gameControllerGetJoystick (mkGameController ptr) = do
-    [| mkJoystick (mkForeign (FFun "SDL_GameControllerGetJoystick" [FPtr] FPtr) ptr) |]
+gameControllerGetJoystick (MkGameController ptr) = do
+    [| MkJoystick (mkForeign (FFun "SDL_GameControllerGetJoystick" [FPtr] FPtr) ptr) |]
 
 --skipped because semantics are confusing
 --public
@@ -117,7 +117,7 @@ gameControllerGetStringForAxis axis =
 --                                 SDL_GameControllerAxis axis);
 public
 gameControllerGetAxis : GameController -> GameControllerAxis -> IO Int
-gameControllerGetAxis (mkGameController ptr) axis =
+gameControllerGetAxis (MkGameController ptr) axis =
     mkForeign (FFun "SDL_GameControllerGetAxis" [FPtr, FInt] FInt) ptr (toFlag axis)
 
 data GameControllerButton = ControllerButtonA
@@ -172,9 +172,9 @@ gameControllerGetStringForButton b =
 --                                   SDL_GameControllerButton button);
 
 gameControllerGetButton : GameController -> GameControllerButton -> IO Int
-gameControllerGetButton (mkGameController ptr) c =
+gameControllerGetButton (MkGameController ptr) c =
     mkForeign (FFun "SDL_GameControllerGetButton" [FPtr, FInt] FInt) ptr (toFlag c)
 
 gameControllerClose : GameController -> IO ()
-gameControllerClose (mkGameController ptr) =
+gameControllerClose (MkGameController ptr) =
     mkForeign (FFun "SDL_GameControllerClose" [FPtr] FUnit) ptr

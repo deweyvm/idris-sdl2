@@ -8,7 +8,7 @@ import Graphics.SDL.Surface
 %include C "csrc/idris_SDL_mouse.h"
 %link C "idris_SDL_mouse.o"
 
-data Cursor = mkCursor Ptr
+data Cursor = MkCursor Ptr
 
 data SystemCursor = SystemCursorArrow
                   | SystemCursorIbeam
@@ -41,13 +41,13 @@ instance Flag Bits32 SystemCursor where
 
 --todo - button states
 
-data MouseState = mkMouseState Int Int Bits32
+data MouseState = MkMouseState Int Int Bits32
 
 --fixme -- return maybe for null ptr
 public
 getMouseFocus : IO Window
 getMouseFocus =
-    [| mkWindow (mkForeign (FFun "SDL_GetMouseFocus" [] FPtr)) |]
+    [| MkWindow (mkForeign (FFun "SDL_GetMouseFocus" [] FPtr)) |]
 
 
 getSharedX : IO Int
@@ -61,7 +61,7 @@ getMouseState_state = mkForeign (FFun "idris_SDL_getMouseState_state" [] FBits32
 
 public
 getMouseState : IO MouseState
-getMouseState = [| mkMouseState getSharedX
+getMouseState = [| MkMouseState getSharedX
                                 getSharedY
                                 getMouseState_state |]
 
@@ -71,13 +71,13 @@ getRelativeMouseState_state = mkForeign (FFun "idris_SDL_getRelativeMouseState_s
 public
 getRelativeMouseState : IO MouseState
 getRelativeMouseState = do
-    [| mkMouseState getSharedX
+    [| MkMouseState getSharedX
                     getSharedY
                     getRelativeMouseState_state |]
 
 public
 warpMouseInWindow : Window -> Int -> Int -> IO ()
-warpMouseInWindow (mkWindow ptr) x y =
+warpMouseInWindow (MkWindow ptr) x y =
     mkForeign (FFun "SDL_WarpMouseInWindow" [FPtr, FInt, FInt] FUnit) ptr x y
 
 public
@@ -92,7 +92,7 @@ getRelativeMouseMode =
 
 getCursor' : IO Cursor
 getCursor' =
-    [| mkCursor (mkForeign (FFun "idris_sharedCursor" [] FPtr)) |]
+    [| MkCursor (mkForeign (FFun "idris_sharedCursor" [] FPtr)) |]
 
 public
 createCursor : Ptr -> Ptr -> Int -> Int -> Int -> Int -> IO (Either String Cursor)
@@ -103,7 +103,7 @@ createCursor data' mask w h hot_x hot_y =
 
 public
 createColorCursor : Surface -> Int -> Int -> IO (Either String Cursor)
-createColorCursor (mkSurface ptr) hot_x hot_y =
+createColorCursor (MkSurface ptr) hot_x hot_y =
     doSDLIf
         (mkForeign (FFun "idris_SDL_createColorCursor" [FPtr, FInt, FInt] FInt) ptr hot_x hot_y)
         getCursor'
@@ -118,7 +118,7 @@ createSystemCursor flag =
 --fixme, will this set GetError on failure?
 public
 setCursor : Cursor -> IO ()
-setCursor (mkCursor ptr) =
+setCursor (MkCursor ptr) =
     mkForeign (FFun "SDL_SetCursor" [FPtr] FUnit) ptr
 
 public
@@ -137,7 +137,7 @@ getDefaultCursor =
 
 public
 freeCursor : Cursor -> IO ()
-freeCursor (mkCursor ptr) =
+freeCursor (MkCursor ptr) =
     mkForeign (FFun "SDL_FreeCursor" [FPtr] FUnit) ptr
 
 public
