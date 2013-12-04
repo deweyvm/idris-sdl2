@@ -26,9 +26,28 @@ instance Flag Bits32 SurfaceFlag where
 --    (Uint32 flags, int width, int height, int depth,
 --     Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask);
 
---public
---CreateRGBSurface : List SurfaceFlag -> Int -> Int -> Int -> Bits32 -> Bits32 -> Bits32 -> Bits32 -> IO Surface
---CreateRGBSurface flags w h depth r g b a
+getSharedSurface : IO Surface
+getSharedSurface =
+    [| MkSurface (mkForeign (FFun "idris_getSharedSurface" [] FPtr)) |]
+
+public
+createRGBSurface : List SurfaceFlag -> Int -> Int -> Int -> Bits32 -> Bits32 -> Bits32 -> Bits32 -> IO (Either String Surface)
+createRGBSurface flags w h depth r g b a =
+    doSDLIf
+        (mkForeign (FFun "idris_SDL_createRGBSurface" [FBits32, FInt, FInt, FInt, FBits32, FBits32, FBits32, FBits32] FInt) (sumBits flags) w h depth r g b a)
+        getSharedSurface
+
+public
+createRGBSurfaceFrom : Pixels -> Int -> Int -> Int -> Int -> Bits32 -> Bits32 -> Bits32 -> Bits32 -> IO (Either String Surface)
+createRGBSurfaceFrom (MkPixels pix) w h d pitch r g b a =
+    doSDLIf
+        (mkForeign (FFun "idris_SDL_createRGBSurfaceFrom" [FPtr, FInt, FInt, FInt, FInt, FBits32, FBits32, FBits32, FBits32] FInt) pix w h d pitch r g b a)
+        getSharedSurface
+
+public
+freeSurface : Surface -> IO ()
+freeSurface (MkSurface surf) =
+    mkForeign (FFun "SDL_FreeSurface" [FPtr] FUnit) surf
 
 public
 blitSurface : Surface -> Rect -> Surface -> Rect -> IO (Maybe String)

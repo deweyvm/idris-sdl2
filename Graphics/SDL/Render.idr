@@ -16,13 +16,6 @@ public
 data Texture = MkTexture Ptr
 
 public
-data Color = MkColor Bits8 Bits8 Bits8 Bits8
-
-public
-red : Color
-red = MkColor 0xFF 0xFF 0xFF 0xFF
-
-public
 data RendererFlag = RendererSoftware
                   | RendererAccelerated
                   | RendererPresentVSync
