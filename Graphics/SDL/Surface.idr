@@ -4,6 +4,8 @@ import Graphics.SDL.Common
 import Graphics.SDL.Rect
 
 %include C "SDL2/SDL_surface.h"
+%include C "csrc/idris_SDL_surface.h"
+%link C "idris_SDL_surface.o"
 
 public
 data Surface = MkSurface Ptr
@@ -21,10 +23,6 @@ instance Flag Bits32 SurfaceFlag where
     toFlag DontFree  =  0x00000004
 
 
-
---SDL_Surface *SDLCALL SDL_CreateRGBSurface
---    (Uint32 flags, int width, int height, int depth,
---     Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask);
 
 getSharedSurface : IO Surface
 getSharedSurface =
@@ -48,6 +46,10 @@ public
 freeSurface : Surface -> IO ()
 freeSurface (MkSurface surf) =
     mkForeign (FFun "SDL_FreeSurface" [FPtr] FUnit) surf
+
+--public
+--setSurfacePalette : Surface -> Palette -> IO (Maybe String)
+--setSurfacePalette (MkSurface surf) (MkPalette pal)
 
 public
 blitSurface : Surface -> Rect -> Surface -> Rect -> IO (Maybe String)

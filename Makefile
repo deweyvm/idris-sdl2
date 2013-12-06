@@ -9,7 +9,8 @@ SRCS = csrc/idris_SDL_video.c \
        csrc/idris_SDL_surface.c \
        csrc/idris_SDL_render.c \
        csrc/idris_SDL_events.c \
-       csrc/idris_SDL_keyboard.c
+       csrc/idris_SDL_keyboard.c \
+       csrc/idris_SDL_pixels.c
 
 OBJS = $(SRCS:.c=.o)
 
