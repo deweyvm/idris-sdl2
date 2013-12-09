@@ -47,9 +47,36 @@ freeSurface : Surface -> IO ()
 freeSurface (MkSurface surf) =
     mkForeign (FFun "SDL_FreeSurface" [FPtr] FUnit) surf
 
---public
---setSurfacePalette : Surface -> Palette -> IO (Maybe String)
---setSurfacePalette (MkSurface surf) (MkPalette pal)
+public
+setSurfacePalette : Surface -> Palette -> IO (Maybe String)
+setSurfacePalette (MkSurface surf) (MkPalette pal) =
+    doSDL (mkForeign (FFun "SDL_SetSurfacePalette" [FPtr, FPtr] FInt) surf pal)
+
+public
+lockSurface : Surface -> IO (Maybe String)
+lockSurface (MkSurface surf) =
+    doSDL (mkForeign (FFun "SDL_LockSurface" [FPtr] FInt) surf)
+
+public
+unlockSurface : Surface -> IO ()
+unlockSurface (MkSurface surf) =
+    mkForeign (FFun "SDL_UnlockSurface" [FPtr] FUnit) surf
+
+public
+loadBMP : String -> IO (Either String Surface)
+loadBMP file =
+    doSDLIf
+        (mkForeign (FFun "idris_SDL_loadBMP" [FString] FInt) file)
+        [| MkSurface (mkForeign (FFun "idris_SDL_loadBMP_surface" [] FPtr)) |]
+
+public
+saveBMP : Surface -> String -> IO (Maybe String)
+saveBMP (MkSurface surf) filename =
+    doSDL (mkForeign (FFun "idris_SDL_saveBMP" [FPtr, FString] FInt) surf filename)
+
+--setSurfaceRLE : Surface -> Int -> IO (Maybe String)
+--setSurfaceRLE (MkSurface
+--    doSDL (mkForeign (FFun "SDL_SetSurfaceRLE" [FPtr, FInt
 
 public
 blitSurface : Surface -> Rect -> Surface -> Rect -> IO (Maybe String)

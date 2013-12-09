@@ -27,3 +27,12 @@ int idris_SDL_blitSurface(SDL_Surface* src,
 
     return 0 == SDL_BlitSurface(src, &srcrect, dst, &dstrect);
 }
+
+int idris_SDL_loadBMP(const char* file) {
+    surface = SDL_LoadBMP(file);
+    return surface != NULL;
+}
+
+SDL_Surface* idris_SDL_loadBMP_surface() {
+    return surface;
+}

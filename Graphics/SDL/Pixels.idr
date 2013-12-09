@@ -17,7 +17,7 @@ red : Color
 red = MkColor 0xFF 0xFF 0xFF 0xFF
 
 public
-data Palette = MkPalette (Maybe Ptr)
+data Palette = MkPalette Ptr
 
 public
 data PixelFormat = PixelFormatUnknown
@@ -98,8 +98,8 @@ instance Flag Bits32 PixelFormat where
 --may be dangerous
 public
 destroyPalette : Palette -> IO ()
-destroyPalette (MkPalette (Just ptr)) = mkForeign (FFun "idris_colorArrayFree" [FPtr] FUnit) ptr
-destroyPalette (MkPalette Nothing) = return ()
+destroyPalette (MkPalette ptr) = mkForeign (FFun "idris_colorArrayFree" [FPtr] FUnit) ptr
+
 
 --FIXME is it okay to free the array immediately after passing it to SDL an SDL function?
 --for now, malloc failure will just return an empty palette
@@ -107,12 +107,10 @@ public
 makePalette : List Color -> IO Palette
 makePalette colors = do
     success <- [| fromSDLBool (mkForeign (FFun "idris_makeColorArray" [FInt] FInt) (fromNat $ length colors)) |]
-    if (not success)
-      then return (MkPalette Nothing)
-      else do
-        sequence_ $ map pushColor colors --okay because of strict eval
-        ptr <- mkForeign (FFun "idris_colorArrayGet" [] FPtr)
-        return $ MkPalette $ Just ptr
+    --fixme, ignored malloc failure
+    sequence_ $ map pushColor colors --okay because of strict eval
+    ptr <- mkForeign (FFun "idris_colorArrayGet" [] FPtr)
+    return $ MkPalette ptr
   where
     pushColor : Color -> IO ()
     pushColor (MkColor r g b a) = mkForeign (FFun "idris_colorArrayPush" [FBits8, FBits8, FBits8, FBits8] FUnit) r g b a
