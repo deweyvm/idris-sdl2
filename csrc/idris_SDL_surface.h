@@ -4,6 +4,8 @@
 #include "SDL2/SDL_surface.h"
 #include "SDL2/SDL_rect.h"
 
+SDL_PixelFormat idris_surfaceGetFormat(SDL_Surface* surface);
+
 SDL_Surface* idris_getSharedSurface();
 
 int idris_SDL_createRGBSurface(Uint32 flags, int width, int height, int depth,

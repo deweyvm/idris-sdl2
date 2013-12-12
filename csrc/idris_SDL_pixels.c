@@ -21,3 +21,34 @@ void idris_paletteFree(void* colors) {
     free(colors);
 }
 
+Uint32 idris_SDL_mapRGB(SDL_PixelFormat format, Uint8 r, Uint8 g, Uint8 b) {
+    return SDL_MapRGB(&format, r, g, b);
+}
+Uint32 idris_SDL_mapRGBA(SDL_PixelFormat format, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+    return SDL_MapRGBA(&format, r, g, b, a);
+}
+
+static Uint8 r;
+static Uint8 g;
+static Uint8 b;
+static Uint8 a;
+
+void idris_SDL_getRGB(Uint32 pixel, const SDL_PixelFormat* format) {
+    SDL_GetRGB(pixel, format, &r, &g, &b);
+}
+Uint8 idris_SDL_getRGB_r() {
+    return r;
+}
+Uint8 idris_SDL_getRGB_g() {
+    return g;
+}
+Uint8 idris_SDL_getRGB_b() {
+    return b;
+}
+
+void idris_SDL_getRGBA(Uint32 pixel, const SDL_PixelFormat* format) {
+    SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
+}
+Uint8 idris_SDL_getRGB_a() {
+    return a;
+}

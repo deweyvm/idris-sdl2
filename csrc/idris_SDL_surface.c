@@ -2,6 +2,11 @@
 
 static SDL_Surface* surface;
 
+SDL_PixelFormat idris_surfaceGetFormat(SDL_Surface* surface) {
+    return *(surface->format);
+}
+
+
 SDL_Surface* idris_getSharedSurface() {
     return surface;
 }
@@ -35,4 +40,8 @@ int idris_SDL_loadBMP(const char* file) {
 
 SDL_Surface* idris_SDL_loadBMP_surface() {
     return surface;
+}
+
+int idris_SDL_saveBMP(SDL_Surface* surface, const char* file) {
+    return 0 != SDL_SaveBMP(surface, file);
 }

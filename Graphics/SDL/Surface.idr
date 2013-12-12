@@ -2,6 +2,7 @@ module Graphics.SDL.Surface
 
 import Graphics.SDL.Common
 import Graphics.SDL.Rect
+import Graphics.SDL.Pixels
 
 %include C "SDL2/SDL_surface.h"
 %include C "csrc/idris_SDL_surface.h"
@@ -22,6 +23,11 @@ instance Flag Bits32 SurfaceFlag where
     toFlag RLEAccel  =  0x00000002
     toFlag DontFree  =  0x00000004
 
+
+
+getSurfaceFormat : Surface -> IO PixelFormat
+getSurfaceFormat (MkSurface surf) =
+    [| MkPixelFormat (mkForeign (FFun "idris_surfaceGetFormat" [FPtr] FPtr) surf) |]
 
 
 getSharedSurface : IO Surface
@@ -74,9 +80,18 @@ saveBMP : Surface -> String -> IO (Maybe String)
 saveBMP (MkSurface surf) filename =
     doSDL (mkForeign (FFun "idris_SDL_saveBMP" [FPtr, FString] FInt) surf filename)
 
---setSurfaceRLE : Surface -> Int -> IO (Maybe String)
---setSurfaceRLE (MkSurface
---    doSDL (mkForeign (FFun "SDL_SetSurfaceRLE" [FPtr, FInt
+public
+setSurfaceRLE : Surface -> Int -> IO (Maybe String)
+setSurfaceRLE (MkSurface surf) flag =
+    doSDL (mkForeign (FFun "SDL_SetSurfaceRLE" [FPtr, FInt] FInt) surf flag)
+
+public
+setColorKey : Surface -> Int -> Color -> IO (Maybe String)
+setColorKey (MkSurface surf) flag c = do
+    format <- getSurfaceFormat (MkSurface surf)
+    color <- mapRGBA format c
+    doSDL (mkForeign (FFun "SDL_SetColorKey" [FPtr, FInt, FBits32] FInt) surf flag color)
+
 
 public
 blitSurface : Surface -> Rect -> Surface -> Rect -> IO (Maybe String)
