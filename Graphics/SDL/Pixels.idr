@@ -101,11 +101,49 @@ instance Flag Bits32 PixelFormatBits where
 instance Enumerable PixelFormatBits where
     enumerate = [Index1LSB, Index1MSB, Index4LSB, Index4MSB, Index8, RGB332, RGB444, RGB555, BGR555, ARGB4444, RGBA4444, ABGR4444, BGRA4444, ARGB1555, RGBA5551, ABGR1555, BGRA5551, RGB565, BGR565, RGB24, BGR24, RGB888, RGBX8888, BGR888, BGRX8888, ARGB8888, RGBA8888, ABGR8888, BGRA8888, ARGB2101010, YV12, IYUV, YUY2, UYVY, YYVU]
 
---may be dangerous
 public
-destroyPalette : Palette -> IO ()
-destroyPalette (MkPalette ptr) = mkForeign (FFun "idris_colorArrayFree" [FPtr] FUnit) ptr
+getPixelFormatName : PixelFormatBits -> IO String
+getPixelFormatName bits = mkForeign (FFun "SDL_GetPixelFormatName" [FBits32] FString) (toFlag bits)
 
+getBpp : IO Int
+getBpp = mkForeign (FFun "idris_SDL_pixelFormatEnumToMasks_bpp" [] FInt)
+
+getRMask : IO Bits32
+getRMask = mkForeign (FFun "idris_SDL_pixelFormatEnumToMasks_Rmask" [] FBits32)
+
+getGMask : IO Bits32
+getGMask = mkForeign (FFun "idris_SDL_pixelFormatEnumToMasks_Gmask" [] FBits32)
+
+getBMask : IO Bits32
+getBMask = mkForeign (FFun "idris_SDL_pixelFormatEnumToMasks_Bmask" [] FBits32)
+
+getAMask : IO Bits32
+getAMask = mkForeign (FFun "idris_SDL_pixelFormatEnumToMasks_Amask" [] FBits32)
+
+public
+pixelFormatEnumToMasks : PixelFormatBits -> IO (Int, Bits32, Bits32, Bits32, Bits32)
+pixelFormatEnumToMasks fmt = do
+    mkForeign (FFun "idris_SDL_pixelFormatEnumToMasks" [FBits32] FUnit) (toFlag fmt)
+    bpp <- getBpp
+    rmask <- getRMask
+    gmask <- getGMask
+    bmask <- getBMask
+    amask <- getAMask
+    return (bpp, rmask, gmask, bmask, amask)
+
+public
+masksToPixelFormatEnum : Int -> Bits32 -> Bits32 -> Bits32 -> Bits32 -> IO PixelFormatBits
+masksToPixelFormatEnum bpp rmask gmask bmask amask =
+    [| (readOrElse Unknown) (mkForeign (FFun "SDL_MasksToPixelFormatEnum" [FInt, FBits32, FBits32, FBits32, FBits32] FBits32) bpp rmask gmask bmask amask) |]
+
+public
+allocFormat : PixelFormatBits -> IO PixelFormat
+allocFormat bits =
+    [| MkPixelFormat (mkForeign (FFun "SDL_AllocFormat" [FBits32] FPtr) (toFlag bits)) |]
+
+public
+freeFormat : PixelFormat -> IO ()
+freeFormat (MkPixelFormat fmt) = mkForeign (FFun "SDL_FreeFormat" [FPtr] FUnit) fmt
 
 --FIXME is it okay to free the array immediately after passing it to SDL an SDL function?
 --for now, malloc failure will just return an empty palette
@@ -121,6 +159,17 @@ makePalette colors = do
     pushColor : Color -> IO ()
     pushColor (MkColor r g b a) = mkForeign (FFun "idris_colorArrayPush" [FBits8, FBits8, FBits8, FBits8] FUnit) r g b a
 
+public
+setPixelFormatPalette : Palette -> PixelFormat -> IO (Maybe String)
+setPixelFormatPalette (MkPalette pal) (MkPixelFormat fmt) =
+    doSDL (mkForeign (FFun "SDL_SetPixelFormatPalette" [FPtr, FPtr] FInt) pal fmt)
+
+--may be dangerous
+public
+destroyPalette : Palette -> IO ()
+destroyPalette (MkPalette ptr) = mkForeign (FFun "idris_colorArrayFree" [FPtr] FUnit) ptr
+
+
 --alpha in color ignored
 public
 mapRGB : PixelFormat -> Color -> IO Bits32
@@ -131,3 +180,38 @@ public
 mapRGBA : PixelFormat -> Color -> IO Bits32
 mapRGBA (MkPixelFormat fmt) (MkColor r g b a) =
     mkForeign (FFun "idris_SDL_mapRGBA" [FPtr, FBits8, FBits8, FBits8, FBits8] FBits32) fmt r g b a
+
+
+getR : IO Bits8
+getR = mkForeign (FFun "idris_SDL_getRGB_r" [] FBits8)
+
+getG : IO Bits8
+getG = mkForeign (FFun "idris_SDL_getRGB_g" [] FBits8)
+
+getB : IO Bits8
+getB = mkForeign (FFun "idris_SDL_getRGB_b" [] FBits8)
+
+getA : IO Bits8
+getA = mkForeign (FFun "idris_SDL_getRGB_a" [] FBits8)
+
+--alpha value returned is always 255
+--might be pure
+public
+getRGB : Bits32{-raw pixel-} -> PixelFormat -> IO Color
+getRGB pixel (MkPixelFormat fmt) = do
+    mkForeign (FFun "idris_SDL_getRGB" [FBits32, FPtr] FUnit) pixel fmt
+    color <- [| MkColor getR getG getB (return 255)|]
+    return color
+
+--might be pure
+public
+getRGBA : Bits32{-raw pixel-} -> PixelFormat -> IO Color
+getRGBA pixel (MkPixelFormat fmt) = do
+    mkForeign (FFun "idris_SDL_getRGBA" [FBits32, FPtr] FUnit) pixel fmt
+    color <- [| MkColor getR getG getB getA |]
+    return color
+
+--might be pure
+public
+calculateGammaRamp : Float -> IO Bits16
+calculateGammaRamp gamma = mkForeign (FFun "idris_SDL_calculateGammaRamp" [FFloat] FBits16) gamma

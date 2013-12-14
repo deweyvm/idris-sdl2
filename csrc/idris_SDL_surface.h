@@ -23,4 +23,6 @@ SDL_Surface* idris_SDL_loadBMP_surface();
 
 int idris_SDL_saveBMP(SDL_Surface* surface, const char* file);
 
+
+
 #endif /* IDRIS_SDL_SURFACE_H */

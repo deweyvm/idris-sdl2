@@ -1,6 +1,32 @@
 
 #include "idris_SDL_pixels.h"
 
+static int bpp;
+static Uint32 Rmask;
+static Uint32 Gmask;
+static Uint32 Bmask;
+static Uint32 Amask;
+
+int idris_SDL_pixelFormatEnumToMasks(Uint32 format) {
+    return SDL_PixelFormatEnumToMasks(format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
+}
+
+int idris_SDL_pixelFormatEnumToMasks_bpp() {
+    return bpp;
+}
+Uint32 idris_SDL_pixelFormatEnumToMasks_Rmask() {
+    return Rmask;
+}
+Uint32 idris_SDL_pixelFormatEnumToMasks_Gmask() {
+    return Gmask;
+}
+Uint32 idris_SDL_pixelFormatEnumToMasks_Bmask() {
+    return Bmask;
+}
+Uint32 idris_SDL_pixelFormatEnumToMasks_Amask() {
+    return Amask;
+}
+
 static SDL_Palette* palette;
 static SDL_Color* colors;
 static int ci = 0;
@@ -49,6 +75,13 @@ Uint8 idris_SDL_getRGB_b() {
 void idris_SDL_getRGBA(Uint32 pixel, const SDL_PixelFormat* format) {
     SDL_GetRGBA(pixel, format, &r, &g, &b, &a);
 }
-Uint8 idris_SDL_getRGB_a() {
+Uint8 idris_SDL_getRGBA_a() {
     return a;
+}
+
+
+Uint16 idris_SDL_calculateGammaRamp(float gamma) {
+    Uint16 retval;
+    SDL_CalculateGammaRamp(gamma, &retval);
+    return retval;
 }
